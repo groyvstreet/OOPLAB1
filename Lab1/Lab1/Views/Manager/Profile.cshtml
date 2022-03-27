@@ -1,0 +1,36 @@
+﻿@{
+}
+
+@model Lab1.Models.ManagerModels.ManagerProfileModel
+
+<form asp-action="LogOut" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Выйти">
+</form>
+
+<h1>@Model.BankName</h1>
+<h2>Профиль менеджера</h2>
+<p>Email: @Model.Email</p>
+<p>Имя: @Model.FirstName</p>
+<p>Фамилия: @Model.LastName</p>
+<p>Отчество: @Model.Patronymic</p>
+<p>Номер телефона: @Model.PhoneNumber</p>
+
+<form asp-action="Deposits" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Список вкладов">
+</form>
+
+<form asp-action="SignUpApprovings" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Заявки на регистрацию">
+</form>
+
+<form asp-action="CreditApprovings" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Заявки на оформление кредита">
+</form>
+
+<form asp-action="InstallmentApprovings" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Заявки на оформление рассрочки">
+</form>
+
+<form asp-action="SalaryApprovings" asp-controller="Operator" asp-anti-forgery="true">
+    <input type="submit" value="Заявки на заработный проект">
+</form>

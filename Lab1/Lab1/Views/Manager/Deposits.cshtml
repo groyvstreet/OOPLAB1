@@ -1,0 +1,92 @@
+﻿@{
+}
+
+@model Lab1.Models.ManagerModels.DepositsManagerModel
+
+<form asp-action="Profile" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Clients.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Список клиентов</caption>
+        <tr>
+            <th>Клиент</th>
+            <th>Вклады</th>
+        </tr>
+        @foreach (var client in Model.Clients)
+        {
+            <tr>
+                <td>
+                    <p>Имя: @client.FirstName</p>
+                    <p>Фамилия: @client.LastName</p>
+                    <p>Отчество: @client.Patronymic</p>
+                    <p>Номер телефона: @client.PhoneNumber</p>
+                    <p>Серия и номер паспорта: @client.PassportSeries @client.PassportNumber</p>
+                    <p>Идентификационный номер: @client.IdentificationNumber</p>
+                </td>
+                <td>
+                    <table cellpadding="10" border="1">
+                        <caption>Список вкладов</caption>
+                        <tr>
+                            <th>Сумма</th>
+                            <th>Процент %</th>
+                            <th>Время создания</th>
+                            <th>Время окончания</th>
+                        </tr>
+                        @foreach (var deposit in client.Deposits)
+                        {
+                            <tr>
+                                <td>@deposit.Money</td>
+                                <td>@deposit.Percent</td>
+                                <td>@deposit.OpenedTime</td>
+                                <td>@deposit.ClosedTime</td>
+                                @if (deposit.Blocked)
+                                {
+                                    <td>
+                                        <form asp-action="Unblock" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                                            <input type="hidden" name="depositId" value="@deposit.Id" />
+                                            <input type="submit" value="Разблокировать вклад">
+                                        </form>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <form asp-action="Block" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                                            <input type="hidden" name="depositId" value="@deposit.Id" />
+                                            <input type="submit" value="Заблокировать вклад">
+                                        </form>
+                                    </td>
+                                }
+                                @if (deposit.Freezed)
+                                {
+                                    <td>
+                                        <form asp-action="Unfreeze" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                                            <input type="hidden" name="depositId" value="@deposit.Id" />
+                                            <input type="submit" value="Разморозить вклад">
+                                        </form>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <form asp-action="Freeze" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                                            <input type="hidden" name="depositId" value="@deposit.Id" />
+                                            <input type="submit" value="Заморозить вклад">
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Зарегистрированных вкладов нет</p>
+}
