@@ -1,0 +1,18 @@
+﻿@{
+}
+@model Lab1.Models.BankModels.BankProfileModel
+
+<h1>@Model.Name</h1>
+<p>Процент для кредита: @Model.Percent</p>
+<p>БИК: @Model.BIC</p>
+@if (Model.Authenticated)
+{
+    <form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+        <input type="submit" value="Личный кабинет">
+    </form>
+}
+else
+{
+    <div><a href="~/User/LogIn/@ViewBag.BankId">Log In</a></div>
+    <div><a href="~/User/SignUp/@ViewBag.BankId">Sign Up</a></div>
+}

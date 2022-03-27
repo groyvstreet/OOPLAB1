@@ -1,0 +1,309 @@
+﻿@{
+}
+
+@model Lab1.Models.ClientModels.ClientProfileModel;
+
+<form asp-action="LogOut" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Выйти">
+</form>
+
+<h1>@Model.BankName</h1>
+<h2>Профиль клиента</h2>
+<p>Email: @Model.Email</p>
+<p>Имя: @Model.FirstName</p>
+<p>Фамилия: @Model.LastName</p>
+<p>Отчество: @Model.Patronymic</p>
+<p>Номер телефона: @Model.PhoneNumber</p>
+<p>Серия паспорта: @Model.PassportSeries</p>
+<p>Номер паспорта: @Model.PassportNumber</p>
+<p>Идентификационный номер: @Model.IdentificationNumber</p>
+<p>Процент для кредита: @Model.Percent</p>
+<p>Предприятие: @Model.CompanyName</p>
+@if (Model.Salary == null)
+{
+    <p>Заработная плата: заявка не подана</p>
+}
+else
+{
+    @if (Model.Salary.ApprovedByOperator)
+    {
+        <p>Заработная плата: @Model.Salary.Money</p>
+    }
+    else if (Model.Salary.ApprovedBySpecialist)
+    {
+        <p>Заработная плата: заявка на рассмотрении, одобрена специалистом</p>
+    }
+    else
+    {
+        <p>Заработная плата: заявка на рассмотрении</p>
+    }
+}
+
+@if (Model.Approved == true)
+{
+    @if (Model.Salary == null)
+    {
+        <form asp-action="CreateSalary" asp-controller="Client" asp-anti-forgery="true">
+            <input type="submit" value="Подать заявку на заработный проект">
+        </form>
+    }
+    else
+    {
+        if (Model.Salary.ApprovedByOperator)
+        {
+            <form asp-action="GetSalary" asp-controller="Client" asp-anti-forgery="true">
+                <div class="input-group mb-3">
+                    <select class="custom-select" id="inputGroupSelect01" name="balanceId">
+                        @foreach (var balance in Model.Balances)
+                        {
+                            <option value="@balance.Id">@balance.Name</option>
+                        }
+                    </select>
+                </div>
+                <input type="submit" value="Получить заработную плату">
+            </form>
+        }
+    }
+
+    <form asp-action="Create" asp-controller="Deposit" asp-anti-forgery="true" method="get">
+        <input type="submit" value="Создать вклад">
+    </form>
+
+    @if (Model.Deposits.Any())
+    {
+        <table cellpadding="10">
+            <caption>Список вкладов</caption>
+            <tr>
+                <th>Сумма</th>
+                <th>Процент %</th>
+                <th>Время окончания</th>
+            </tr>
+            @foreach (var deposit in Model.Deposits)
+            {
+                <tr>
+                    <td>@deposit.Money</td>
+                    <td>@deposit.Percent</td>
+                    <td>@deposit.ClosedTime</td>
+                    @if (deposit.Blocked)
+                    {
+                        <td>Вклад заблокирован</td>
+                    }
+                    else
+                    {
+                        <td>
+                            <form asp-action="Get" asp-controller="Deposit" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="depositId" value="@deposit.Id" />
+                                <input type="submit" value="Снять вклад">
+                            </form>
+                        </td>
+                    }
+                    <td>
+                        @if (deposit.ClosedTime <= Model.NowTime)
+                        {
+                            <form asp-action="Transfer" asp-controller="Deposit" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="depositId" value="@deposit.Id" />
+                                <input type="submit" value="Перевести вклад">
+                            </form>
+                        }
+                    </td>
+                    @if (deposit.ClosedTime >= Model.NowTime)
+                    {
+                        if (deposit.Freezed)
+                        {
+                            <td>Вклад заморожен</td>
+                        }
+                        else
+                        {
+                            <td>
+                                <form asp-action="Add" asp-controller="Deposit" asp-anti-forgery="true" method="get">
+                                    <input type="hidden" name="depositId" value="@deposit.Id" />
+                                    <input type="submit" value="Пополнить вклад">
+                                </form>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>У вас ещё нет вкладов</p>
+    }
+
+    <form asp-action="Open" asp-controller="Balance" asp-anti-forgery="true" method="get">
+        <input type="submit" value="Открыть счет">
+    </form>
+
+    @if (Model.Balances.Any())
+    {
+        <table cellpadding="10">
+            <caption>Список счетов</caption>
+            <tr>
+                <th>Название</th>
+                <th>Сумма</th>
+            </tr>
+            @foreach (var balance in Model.Balances)
+            {
+                <tr>
+                    <td>@balance.Name</td>
+                    <td>@balance.Money</td>
+                    <td>
+                        <form asp-action="Close" asp-controller="Balance" asp-anti-forgery="true" method="get">
+                            <input type="hidden" name="balanceId" value="@balance.Id" />
+                            <input type="submit" value="Закрыть счет">
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-action="Transfer" asp-controller="Balance" asp-anti-forgery="true" method="get">
+                            <input type="hidden" name="balanceId" value="@balance.Id" />
+                            <input type="submit" value="Перевести сумму на другой счет">
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-action="Add" asp-controller="Balance" asp-anti-forgery="true" method="get">
+                            <input type="hidden" name="balanceId" value="@balance.Id" />
+                            <input type="submit" value="Пополнить счет">
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>У вас ещё нет счетов</p>
+    }
+
+    <form asp-action="Create" asp-controller="Credit" asp-anti-forgery="true" method="get">
+        <input type="submit" value="Оформить кредит">
+    </form>
+
+    @if (Model.Credits.Any())
+    {
+        <table cellpadding="10">
+            <caption>Список кредитов</caption>
+            <tr>
+                <th>Сумма</th>
+                <th>Процент</th>
+                <th>Выплачиваемая сумма</th>
+                <th>Дата оформления</th>
+                <th>Количество месяцев</th>
+                <th>Последний день выплат</th>
+            </tr>
+            @foreach (var credit in Model.Credits)
+            {
+                <tr>
+                    <td>@credit.Money</td>
+                    <td>@credit.Percent + @credit.Fines</td>
+                    <td>@credit.MoneyWithPercent</td>
+                    @if (credit.Approved)
+                    {
+                        <td>@credit.CreatingTime</td>
+                    }
+                    else
+                    {
+                        <td>---</td>
+                    }
+                    <td>@credit.PayedMonths / @credit.Months</td>
+                    @if (credit.Approved)
+                    {
+                        <td>@credit.PaymentTime</td>
+                    }
+                    else
+                    {
+                        <td>---</td>
+                    }
+                    @if (credit.Approved == true)
+                    {
+                        <td>
+                            <form asp-action="Pay" asp-controller="Credit" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="creditId" value="@credit.Id" />
+                                <input type="submit" value="Выплатить за 1 месяц">
+                            </form>
+                            <form asp-action="PayAll" asp-controller="Credit" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="creditId" value="@credit.Id" />
+                                <input type="submit" value="Выплатить всю сумму">
+                            </form>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>Кредит на рассмотрении</td>
+                    }
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>У вас ещё нет кредитов</p>
+    }
+
+    <form asp-action="Create" asp-controller="Installment" asp-anti-forgery="true" method="get">
+        <input type="submit" value="Оформить рассрочку">
+    </form>
+
+    @if (Model.Installments.Any())
+    {
+        <table cellpadding="10">
+            <caption>Список рассрочек</caption>
+            <tr>
+                <th>Сумма</th>
+                <th>Выплачиваемая сумма</th>
+                <th>Дата оформления</th>
+                <th>Количество месяцев</th>
+                <th>Последний день выплат</th>
+            </tr>
+            @foreach (var installment in Model.Installments)
+            {
+                <tr>
+                    <td>@installment.Money</td>
+                    <td>@installment.PayMoney</td>
+                    @if (installment.Approved)
+                    {
+                        <td>@installment.CreatingTime</td>
+                    }
+                    else
+                    {
+                        <td>---</td>
+                    }
+                    <td>@installment.PayedMonths / @installment.Months</td>
+                    @if (installment.Approved)
+                    {
+                        <td>@installment.PaymentTime</td>
+                    }
+                    else
+                    {
+                        <td>---</td>
+                    }
+                    @if (installment.Approved == true)
+                    {
+                        <td>
+                            <form asp-action="Pay" asp-controller="Installment" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="installmentId" value="@installment.Id" />
+                                <input type="submit" value="Выплатить за 1 месяц">
+                            </form>
+                            <form asp-action="PayAll" asp-controller="Installment" asp-anti-forgery="true" method="get">
+                                <input type="hidden" name="installmentId" value="@installment.Id" />
+                                <input type="submit" value="Выплатить всю сумму">
+                            </form>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>Рассрочка на рассмотрении</td>
+                    }
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>У вас ещё нет рассрочек</p>
+    }
+}
+else
+{
+    <p>Регистрация не подтверждена</p>
+}
