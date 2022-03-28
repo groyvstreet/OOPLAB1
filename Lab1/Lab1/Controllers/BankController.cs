@@ -18,7 +18,7 @@ namespace Lab1.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Banks()
+        public async Task<IActionResult> List()
         {
             //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (User.Identity.IsAuthenticated)
@@ -26,7 +26,11 @@ namespace Lab1.Controllers
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
                 return RedirectToAction("Profile", "Bank");
             }
-            return View(_context.Banks.ToList());
+            var model = new ListBankModel
+            {
+                Banks = _context.Banks.ToList()
+            };
+            return View(model);
         }
 
         public async Task<IActionResult> Profile(string? bankId)

@@ -89,10 +89,8 @@ namespace Lab1.Controllers
 
         [HttpPost]
         [Authorize(Roles = "client")]
-        public async Task<IActionResult> SignUpAsClient(SignUpClientModel model)
+        public async Task<IActionResult> SignUp(SignUpClientModel model)
         {
-            /*if (ModelState.IsValid)
-            {*/
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
             var bank = await _context.Banks.FirstOrDefaultAsync(b => b.Id == user.BankId);
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == model.CompanyId);
@@ -123,8 +121,6 @@ namespace Lab1.Controllers
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
-            //}
-            return View(model);
         }
 
         [Authorize(Roles = "client")]

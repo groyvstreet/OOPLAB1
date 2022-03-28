@@ -15,17 +15,17 @@
         <div>
             <label asp-for="PassportSeries">Введите серию паспорта</label><br />
             <input type="text" asp-for="PassportSeries" />
-            @*<span asp-validation-for="PassportSeries" />*@
+            <span asp-validation-for="PassportSeries" />
         </div>
         <div>
             <label asp-for="PassportNumber">Введите номер паспорта</label><br />
             <input type="number" asp-for="PassportNumber" />
-            @*<span asp-validation-for="PassportNumber" />*@
+            <span asp-validation-for="PassportNumber" />
         </div>
         <div>
             <label asp-for="IdentificationNumber">Введите идентификационный номер паспорта</label><br />
             <input type="text" asp-for="IdentificationNumber" />
-            @*<span asp-validation-for="IdentificationNumber" />*@
+            <span asp-validation-for="IdentificationNumber" />
         </div>
         <div class="input-group mb-3">
             <select class="custom-select" id="inputGroupSelect01" asp-for="@Model.CompanyId">
