@@ -2,6 +2,13 @@
 }
 @model Lab1.Models.BankModels.BankProfileModel
 
+@if (Model.Authenticated)
+{
+    <form asp-action="LogOut" asp-controller="User" asp-anti-forgery="true">
+        <input type="submit" value="Выйти">
+    </form>
+}
+
 <h1>@Model.Name</h1>
 <p>Процент для кредита: @Model.Percent</p>
 <p>БИК: @Model.BIC</p>

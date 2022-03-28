@@ -1,0 +1,18 @@
+﻿@model Lab1.Models.BankModels.ListBankModel
+
+<table cellpadding="10">
+    @foreach (var bank in Model.Banks)
+    {
+        <tr>
+            <td>
+                @bank.Name
+            </td>
+            <td>
+                <form asp-action="Profile" asp-controller="Bank" asp-anti-forgery="true" method="get">
+                    <input type="hidden" name="bankId" value="@bank.Id" />
+                    <input type="submit" value="Перейти к банку">
+                </form>
+            <td>
+        </tr>
+    }
+</table>

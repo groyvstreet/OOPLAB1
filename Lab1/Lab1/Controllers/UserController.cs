@@ -69,7 +69,7 @@ namespace Lab1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignUp(SignUpModel model)
+        public async Task<IActionResult> SignUp(SignUpUserModel model)
         {
             ViewBag.Roles = _context.Roles;
             if (ModelState.IsValid)
@@ -170,7 +170,7 @@ namespace Lab1.Controllers
         public async Task<IActionResult> LogOut()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Banks", "Bank");
+            return RedirectToAction("List", "Bank");
         }
     }
 }
