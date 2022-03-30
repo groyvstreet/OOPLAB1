@@ -61,7 +61,7 @@
                     @if (action.BalanceIdFrom != null && action.BalanceIdTo != null)
                     {
                         <td>
-                            <form asp-action="CancelSpecialistBalanceTransfer" asp-controller="Manager" asp-anti-forgery="true">
+                            <form asp-action="CancelSpecialistBalanceTransferAction" asp-controller="Manager" asp-anti-forgery="true">
                                 <input type="hidden" name="actionId" value="@action.Id" />
                                 <input type="submit" value="Отменить">
                             </form>

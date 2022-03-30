@@ -27,7 +27,15 @@
                 <td>
                     <form asp-action="SpecialistBalanceTransferActions" asp-controller="Manager" asp-anti-forgery="true">
                         <input type="hidden" name="specialistId" value="@specialist.Id" />
-                        <input type="submit" value="Перейти">
+                        <input type="submit" value="Переводы">
+                    </form>
+                    <form asp-action="SalaryApprovingBySpecialistActions" asp-controller="Manager" asp-anti-forgery="true">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Подтверждения">
+                    </form>
+                    <form asp-action="SalaryRejectingBySpecialistActions" asp-controller="Manager" asp-anti-forgery="true">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Отклонения">
                     </form>
                 </td>
             </tr>
