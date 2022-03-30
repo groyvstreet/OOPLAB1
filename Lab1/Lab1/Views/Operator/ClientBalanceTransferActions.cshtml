@@ -1,0 +1,82 @@
+﻿@{
+}
+
+@model Lab1.Models.OperatorModels.ClientBalanceTransferActionOperatorModel
+
+<form asp-action="Clients" asp-controller="Operator" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.BalanceTransferActions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Переводы</caption>
+        <tr>
+            <th>Счет-отправитель</th>
+            <th>Счет-получатель</th>
+        </tr>
+        @foreach (var action in Model.BalanceTransferActions)
+        {
+            <tr>
+                <td>
+                    <div>Банк: @action.BankNameFrom</div>
+                    <div>Почта клиента: @action.UserEmailFrom</div>
+                    @if (action.BalanceIdFrom == null)
+                    {
+                        <div>Счет закрыт</div>
+                    }
+                    else
+                    {
+                        <div>Наименование счета: @action.BalanceNameFrom</div>
+                    }
+                </td>
+                <td>
+                    <div>Банк: @action.BankNameTo</div>
+                    <div>Почта клиента: @action.UserEmailTo</div>
+                    @if (action.BalanceIdTo == null)
+                    {
+                        <div>Счет закрыт</div>
+                    }
+                    else
+                    {
+                        <div>Наименование счета: @action.BalanceNameTo</div>
+                    }
+                </td>
+                <td>
+                    @if (action.UserIdFrom == Model.CurrentClientId)
+                    {
+                        <div>Сумма перевода: -@action.Money</div>
+                    }
+                    else
+                    {
+                        <div>Сумма перевода: +@action.Money</div>
+                    }
+                </td>
+                @if (action.Canceled)
+                {
+                    <td>Перевод отменен</td>
+                }
+                else
+                {
+                    @if (action.BalanceIdFrom != null && action.BalanceIdTo != null)
+                    {
+                        <td>
+                            <form asp-action="CancelBalanceTransfer" asp-controller="Operator" asp-anti-forgery="true">
+                                <input type="hidden" name="actionId" value="@action.Id" />
+                                <input type="submit" value="Отменить">
+                            </form>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>Перевод не возможен</td>
+                    }
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Переводов нет</p>
+}

@@ -30,6 +30,23 @@ namespace Lab1.Models.Data
                 CompanyId = "0"
             });
 
+            context.Clients.Add(new Client
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "asd@mail.ru",
+                FirstName = "a",
+                LastName = "s",
+                Patronymic = "d",
+                Password = "123456",
+                PhoneNumber = "asd",
+                PassportSeries = "asd",
+                IdentificationNumber = "asd",
+                RoleName = "client",
+                BankId = "0",
+                Approved = true,
+                CompanyId = "0"
+            });
+
             for (int i = 0; i < 3; i++)
             {
                 context.Admins.Add(new Admin

@@ -1,6 +1,7 @@
 ﻿using Lab1.Models.BalanceModels;
 using Lab1.Models.Data;
 using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,21 @@ namespace Lab1.Controllers
                     _context.Balances.Remove(cBalance);
                     client.Balances.Remove(cBalance);
                     _context.Clients.Update(client);
+                    var cBalanceTransferActions = _context.BalanceTransferActions
+                        .Where(a => a.BalanceIdFrom == cBalance.Id || a.BalanceIdTo ==
+                            cBalance.Id).ToList();
+                    foreach (var balanceTransferAction in cBalanceTransferActions)
+                    {
+                        if (balanceTransferAction.BalanceIdFrom == cBalance.Id)
+                        {
+                            balanceTransferAction.BalanceIdFrom = null;
+                        }
+                        else
+                        {
+                            balanceTransferAction.BalanceIdTo = null;
+                        }
+                        _context.BalanceTransferActions.Update(balanceTransferAction);
+                    }
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Client");
                 case "specialist":
@@ -81,6 +97,21 @@ namespace Lab1.Controllers
                     _context.Balances.Remove(sBalance);
                     specialist.Balances.Remove(sBalance);
                     _context.Specialists.Update(specialist);
+                    var sBalanceTransferActions = _context.BalanceTransferActions
+                        .Where(a => a.BalanceIdFrom == sBalance.Id || a.BalanceIdTo ==
+                            sBalance.Id).ToList();
+                    foreach (var balanceTransferAction in sBalanceTransferActions)
+                    {
+                        if (balanceTransferAction.BalanceIdFrom == sBalance.Id)
+                        {
+                            balanceTransferAction.BalanceIdFrom = null;
+                        }
+                        else
+                        {
+                            balanceTransferAction.BalanceIdTo = null;
+                        }
+                        _context.BalanceTransferActions.Update(balanceTransferAction);
+                    }
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Specialist");
             }
@@ -142,7 +173,16 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client, specialist")]
         public async Task<IActionResult> Transfer(TransferBalanceModel model)
         {
+            if (model.Money == 0)
+            {
+                ModelState.AddModelError("", "Минимальная сумма перевода 0.01");
+                return View(model);
+            }
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
+            var balanceTransferAction = new BalanceTransferAction
+            {
+                Money = model.Money,
+            };
             switch (user.RoleName)
             {
                 case "client":
@@ -150,12 +190,49 @@ namespace Lab1.Controllers
                         .Include(c => c.Balances)
                         .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     var cBank = await _context.Banks.FirstOrDefaultAsync(b => b.Name == model.BankNameTo);
+                    if (cBank == null)
+                    {
+                        ModelState.AddModelError("", "Указанный банк отсутствует в системе");
+                        return View(model);
+                    }
                     var cBankIdTo = cBank.Id;
                     var clientTo = await _context.Clients
                         .Include(c => c.Balances)
                         .FirstOrDefaultAsync(c => c.Email == model.EmailTo && c.BankId == cBankIdTo);
+                    if (clientTo == null)
+                    {
+                        ModelState.AddModelError("", "Счет не найден");
+                        return View(model);
+                    }
                     var cBalanceFrom = clientFrom.Balances.FirstOrDefault(b => b.Id == model.IdFrom);
                     var cBalanceTo = clientTo.Balances.FirstOrDefault(b => b.Name == model.BalanceNameTo);
+                    if (cBalanceTo == null)
+                    {
+                        ModelState.AddModelError("", "Счет не найден");
+                        return View(model);
+                    }
+                    if (cBalanceFrom.Id == cBalanceTo.Id)
+                    {
+                        ModelState.AddModelError("", "Невозможная операция");
+                        return View(model);
+                    }
+                    var bankFrom = await _context.Banks.FirstOrDefaultAsync(b => b.Id ==
+                        clientFrom.BankId);
+                    var bankTo = await _context.Banks.FirstOrDefaultAsync(b => b.Id ==
+                        clientTo.BankId);
+
+                    balanceTransferAction.BankIdFrom = bankFrom.Id;
+                    balanceTransferAction.BankIdTo = bankTo.Id;
+                    balanceTransferAction.BankNameFrom = bankFrom.Name;
+                    balanceTransferAction.BankNameTo = bankTo.Name;
+                    balanceTransferAction.UserIdFrom = clientFrom.Id;
+                    balanceTransferAction.UserIdTo = clientTo.Id;
+                    balanceTransferAction.UserEmailFrom = clientFrom.Email;
+                    balanceTransferAction.UserEmailTo = clientTo.Email;
+                    balanceTransferAction.BalanceIdFrom = cBalanceFrom.Id;
+                    balanceTransferAction.BalanceIdTo = cBalanceTo.Id;
+                    balanceTransferAction.BalanceNameFrom = cBalanceFrom.Name;
+                    balanceTransferAction.BalanceNameTo = cBalanceTo.Name;
 
                     clientFrom.Balances.Remove(cBalanceFrom);
                     cBalanceFrom.Money -= model.Money;
@@ -165,6 +242,7 @@ namespace Lab1.Controllers
                     cBalanceTo.Money += model.Money;
                     clientTo.Balances.Add(cBalanceTo);
 
+                    _context.BalanceTransferActions.Add(balanceTransferAction);
                     _context.Balances.Update(cBalanceFrom);
                     _context.Balances.Update(cBalanceTo);
                     _context.Clients.Update(clientFrom);
@@ -176,26 +254,47 @@ namespace Lab1.Controllers
                         .Include(c => c.Balances)
                         .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     var sBank = await _context.Banks.FirstOrDefaultAsync(b => b.Name == model.BankNameTo);
+                    if (sBank == null)
+                    {
+                        ModelState.AddModelError("", "Указанный банк отсутствует в системе");
+                        return View(model);
+                    }
                     var sBankIdTo = sBank.Id;
                     var specialistTo = await _context.Specialists
                         .Include(s => s.Balances)
                         .FirstOrDefaultAsync(s => s.Email == model.EmailTo && s.BankId == sBankIdTo
                             && s.CompanyId == specialistFrom.CompanyId);
+                    if (specialistTo == null)
+                    {
+                        ModelState.AddModelError("", "Счет не найден");
+                        return View(model);
+                    }
                     var sBalanceFrom = specialistFrom.Balances.FirstOrDefault(b => b.Id == model.IdFrom);
                     var sBalanceTo = specialistTo.Balances.FirstOrDefault(b => b.Name == model.BalanceNameTo);
+                    if (sBalanceTo == null)
+                    {
+                        ModelState.AddModelError("", "Счет не найден");
+                        return View(model);
+                    }
+                    if (sBalanceFrom.Id == sBalanceTo.Id)
+                    {
+                        ModelState.AddModelError("", "Невозможная операция");
+                        return View(model);
+                    }
 
                     specialistFrom.Balances.Remove(sBalanceFrom);
                     sBalanceFrom.Money -= model.Money;
                     specialistFrom.Balances.Add(sBalanceFrom);
 
-                    specialistTo.Balances.Remove(sBalanceTo);
-                    sBalanceTo.Money += model.Money;
-                    specialistTo.Balances.Add(sBalanceTo);
-
+                    var balanceTransferApproving = new BalanceTransferApproving
+                    {
+                        Money = model.Money,
+                        BalanceIdFrom = sBalanceFrom.Id,
+                        BalanceIdTo = sBalanceTo.Id
+                    };
+                    _context.BalanceTransferApprovings.Add(balanceTransferApproving);
                     _context.Balances.Update(sBalanceFrom);
-                    _context.Balances.Update(sBalanceTo);
                     _context.Specialists.Update(specialistFrom);
-                    _context.Specialists.Update(specialistTo);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Specialist");
             }

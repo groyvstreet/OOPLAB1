@@ -1,0 +1,52 @@
+﻿@{
+}
+
+@model Lab1.Models.ManagerModels.BalanceTransferApprovingManagerModel
+
+<form asp-action="Profile" asp-controller="Manager" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.BalanceTransferApprovings.Any())
+{
+    <table cellpadding="10">
+        <caption>Заявки на перевод средств</caption>
+        <tr>
+            <th>Специалист-отправитель</th>
+            <th>Специалист-получатель</th>
+            <th>Сумма перевода</th>
+        </tr>
+        @foreach (var approving in Model.BalanceTransferApprovings)
+        {
+            <tr>
+                <td>
+                    <p>Имя: @approving.SpecialistFrom.FirstName</p>
+                    <p>Фамилия: @approving.SpecialistFrom.LastName</p>
+                    <p>Отчество: @approving.SpecialistFrom.Patronymic</p>
+                    <p>Номер телефона: @approving.SpecialistFrom.PhoneNumber</p>
+                </td>
+                <td>
+                    <p>Имя: @approving.SpecialistTo.FirstName</p>
+                    <p>Фамилия: @approving.SpecialistTo.LastName</p>
+                    <p>Отчество: @approving.SpecialistTo.Patronymic</p>
+                    <p>Номер телефона: @approving.SpecialistTo.PhoneNumber</p>
+                </td>
+                <td>@approving.Money</td>
+                <td>
+                    <form asp-action="ApproveBalanceTransfer" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="approvingId" value="@approving.ApprovingId" />
+                        <input type="submit" value="Одобрить">
+                    </form>
+                    <form asp-action="RejectBalanceTransfer" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="approvingId" value="@approving.ApprovingId" />
+                        <input type="submit" value="Отклонить">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Заявок на перевод средств нет</p>
+}
