@@ -111,5 +111,75 @@ namespace Lab1.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovings", "Operator");
         }
+
+        [Authorize(Roles = "admin, operator, manager")]
+        public async Task<IActionResult> Clients()
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
+            var contextClients = _context.Clients.Where(c => c.BankId == user.BankId).ToList();
+            var model = new ClientsOperatorModel
+            {
+                Clients = contextClients
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin, operator, manager")]
+        public async Task<IActionResult> ClientBalanceTransferActions(string? clientId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == 
+                User.Identity.Name);
+            var balanceTransferActions = _context.BalanceTransferActions
+                .Where(a => (a.UserIdFrom == clientId || a.UserIdTo == clientId) &&
+                    a.BankIdFrom == user.BankId).ToList();
+            var model = new ClientBalanceTransferActionOperatorModel
+            {
+                BalanceTransferActions = balanceTransferActions,
+                CurrentClientId = clientId
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin, operator, manager")]
+        public async Task<IActionResult> CancelClientBalanceTransfer(string? actionId)
+        {
+            var action = await _context.BalanceTransferActions
+                .FirstOrDefaultAsync(a => a.Id == actionId);
+            if (action.BalanceIdFrom == null || action.BalanceIdTo == null || action.Canceled == true)
+            {
+                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+            }
+            var clientFrom = await _context.Clients
+                .Include(c => c.Balances)
+                .FirstOrDefaultAsync(c => c.Id == action.UserIdFrom);
+            var clientTo = await _context.Clients
+                .Include(c => c.Balances)
+                .FirstOrDefaultAsync(c => c.Id == action.UserIdTo);
+            var balanceFrom = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
+                action.BalanceIdFrom);
+            var balanceTo = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
+                action.BalanceIdTo);
+            if (balanceTo.Money < action.Money)
+            {
+                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+            }
+            
+            clientFrom.Balances.Remove(balanceFrom);
+            balanceFrom.Money += action.Money;
+            clientFrom.Balances.Add(balanceFrom);
+
+            clientTo.Balances.Remove(balanceTo);
+            balanceTo.Money -= action.Money;
+            clientTo.Balances.Add(balanceTo);
+
+            action.Canceled = true;
+            _context.BalanceTransferActions.Update(action);
+            _context.Balances.Update(balanceFrom);
+            _context.Balances.Update(balanceTo);
+            _context.Clients.Update(clientFrom);
+            _context.Clients.Update(clientTo);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+        }
     }
 }

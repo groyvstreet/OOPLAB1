@@ -1,4 +1,5 @@
 ﻿using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -23,6 +24,8 @@ namespace Lab1.Models.Data
         public DbSet<InstallmentApproving> InstallmentApprovings { get; set; }
         public DbSet<SalaryApproving> SalaryApprovings { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<BalanceTransferApproving> BalanceTransferApprovings { get; set; }
+        public DbSet<BalanceTransferAction> BalanceTransferActions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

@@ -1,0 +1,40 @@
+﻿@{
+}
+
+@model Lab1.Models.ManagerModels.SpecialistsManagerModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Specialists.Any())
+{
+    <table cellpadding="10" border = "1">
+        <caption>Список специалистов</caption>
+        <tr>
+            <th>Специалист</th>
+        </tr>
+        @foreach (var specialist in Model.Specialists)
+        {
+            <tr>
+                <td>
+                    <p>Email: @specialist.Email</p>
+                    <p>Имя: @specialist.FirstName</p>
+                    <p>Фамилия: @specialist.LastName</p>
+                    <p>Отчество: @specialist.Patronymic</p>
+                    <p>Номер телефона: @specialist.PhoneNumber</p>
+                </td>
+                <td>
+                    <form asp-action="SpecialistBalanceTransferActions" asp-controller="Manager" asp-anti-forgery="true">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Перейти">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Нет зарегистрированных специалистов</p>
+}

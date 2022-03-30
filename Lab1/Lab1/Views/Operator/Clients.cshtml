@@ -1,0 +1,43 @@
+﻿@{
+}
+
+@model Lab1.Models.OperatorModels.ClientsOperatorModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Clients.Any())
+{
+    <table cellpadding="10" border = "1">
+        <caption>Список клиентов</caption>
+        <tr>
+            <th>Клиент</th>
+        </tr>
+        @foreach (var client in Model.Clients)
+        {
+            <tr>
+                <td>
+                    <p>Email: @client.Email</p>
+                    <p>Имя: @client.FirstName</p>
+                    <p>Фамилия: @client.LastName</p>
+                    <p>Отчество: @client.Patronymic</p>
+                    <p>Номер телефона: @client.PhoneNumber</p>
+                    <p>Серия паспорта: @client.PassportSeries</p>
+                    <p>Номер паспорта: @client.PassportNumber</p>
+                    <p>Идентификационный номер: @client.IdentificationNumber</p>
+                </td>
+                <td>
+                    <form asp-action="ClientBalanceTransferActions" asp-controller="Operator" asp-anti-forgery="true">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Перейти">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Нет зарегистрированных клиентов</p>
+}
