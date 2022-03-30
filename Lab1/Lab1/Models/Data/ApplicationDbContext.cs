@@ -26,6 +26,8 @@ namespace Lab1.Models.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<BalanceTransferApproving> BalanceTransferApprovings { get; set; }
         public DbSet<BalanceTransferAction> BalanceTransferActions { get; set; }
+        public DbSet<SalaryApprovingBySpecialistAction> SalaryApprovingBySpecialistActions { get; set; }
+        public DbSet<SalaryRejectingBySpecialistAction> SalaryRejectingBySpecialistActions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

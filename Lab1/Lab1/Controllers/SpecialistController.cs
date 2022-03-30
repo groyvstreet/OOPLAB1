@@ -1,5 +1,6 @@
 ﻿using Lab1.Models.Data;
 using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Lab1.Models.SpecialistModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,6 +109,20 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(c => c.Id == clientId);
             client.Salary.ApprovedBySpecialist = true;
             _context.Clients.Update(client);
+            var specialist = await _context.Specialists.FirstOrDefaultAsync(s => s.Id ==
+                User.Identity.Name);
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id ==
+                specialist.CompanyId);
+            var salaryApprovingBySpecialistAction = new SalaryApprovingBySpecialistAction
+            {
+                SpecialistId = specialist.Id,
+                SpecialistEmail = specialist.Email,
+                ClientId = client.Id,
+                ClientEmail = client.Email,
+                CompanyName = company.LegalName,
+                Info = $"Специалист {specialist.Email} подтвердил отправку документов клиента {client.Email}."
+            };
+            _context.SalaryApprovingBySpecialistActions.Add(salaryApprovingBySpecialistAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovings", "Specialist");
         }
@@ -122,6 +137,20 @@ namespace Lab1.Controllers
             _context.Clients.Update(client);
             var salaryApproving = await _context.SalaryApprovings.FirstOrDefaultAsync(s => s.ClientId == clientId);
             _context.SalaryApprovings.Remove(salaryApproving);
+            var specialist = await _context.Specialists.FirstOrDefaultAsync(s => s.Id ==
+                User.Identity.Name);
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id ==
+                specialist.CompanyId);
+            var salaryRejectingingBySpecialistAction = new SalaryRejectingBySpecialistAction
+            {
+                SpecialistId = specialist.Id,
+                SpecialistEmail = specialist.Email,
+                ClientId = client.Id,
+                ClientEmail = client.Email,
+                CompanyName = company.LegalName,
+                Info = $"Специалист {specialist.Email} отклонил отправку документов клиента {client.Email}."
+            };
+            _context.SalaryRejectingBySpecialistActions.Add(salaryRejectingingBySpecialistAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovings", "Specialist");
         }

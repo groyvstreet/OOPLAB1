@@ -456,7 +456,7 @@ namespace Lab1.Controllers
         }
 
         [Authorize(Roles = "admin, manager")]
-        public async Task<IActionResult> CancelSpecialistBalanceTransfer(string? actionId)
+        public async Task<IActionResult> CancelSpecialistBalanceTransferAction(string? actionId)
         {
             var action = await _context.BalanceTransferActions
                 .FirstOrDefaultAsync(a => a.Id == actionId);
@@ -495,6 +495,95 @@ namespace Lab1.Controllers
             _context.Specialists.Update(specialistTo);
             await _context.SaveChangesAsync();
             return RedirectToAction("SpecialistBalanceTransferActions", "Manager", new { specialistId = action.UserIdFrom });
+        }
+
+        [Authorize(Roles = "admin, manager")]
+        public async Task<IActionResult> SalaryApprovingBySpecialistActions(string? specialistId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id ==
+                User.Identity.Name);
+            var actions = _context.SalaryApprovingBySpecialistActions
+                .Where(a => a.SpecialistId == specialistId).ToList();
+            var model = new SalaryApprovingBySpecialistActionsManagerModel
+            {
+                Actions = actions
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin, manager")]
+        public async Task<IActionResult> CancelSalaryApprovingBySpecialistAction(string? actionId)
+        {
+            var action = await _context.SalaryApprovingBySpecialistActions
+                .FirstOrDefaultAsync(a => a.Id == actionId);
+            var client = await _context.Clients
+                .Include(c => c.Salary)
+                .FirstOrDefaultAsync(c => c.Id == action.ClientId);
+            if (client.Salary.ApprovedByOperator || action.Canceled)
+            {
+                return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.SpecialistId });
+            }
+            client.Salary.ApprovedBySpecialist = false;
+            _context.Clients.Update(client);
+            /*var salaryApproving = new SalaryApproving
+            {
+                ClientId = action.ClientId
+            };
+            _context.SalaryApprovings.Add(salaryApproving);*/
+            action.Canceled = true;
+            _context.SalaryApprovingBySpecialistActions.Update(action);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.SpecialistId });
+        }
+
+        [Authorize(Roles = "admin, manager")]
+        public async Task<IActionResult> SalaryRejectingBySpecialistActions(string? specialistId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id ==
+                User.Identity.Name);
+            var actions = _context.SalaryRejectingBySpecialistActions
+                .Where(a => a.SpecialistId == specialistId).ToList();
+            var model = new SalaryRejectingBySpecialistActionsManagerModel
+            {
+                Actions = actions
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin, manager")]
+        public async Task<IActionResult> CancelSalaryRejectingBySpecialistAction(string? actionId)
+        {
+            var action = await _context.SalaryRejectingBySpecialistActions
+                .FirstOrDefaultAsync(a => a.Id == actionId);
+            var client = await _context.Clients
+                .Include(c => c.Salary)
+                .FirstOrDefaultAsync(c => c.Id == action.ClientId);
+            if (action.Canceled)
+            {
+                return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.SpecialistId });
+            }
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id ==
+                client.CompanyId);
+            client.Salary = new Salary
+            {
+                Money = company.SalaryMoney,
+                ClientId = client.Id
+            };
+            _context.Clients.Update(client);
+            var salaryApproving = new SalaryApproving
+            {
+                ClientId = client.Id
+            };
+            _context.SalaryApprovings.Add(salaryApproving);
+            /*var salaryApproving = new SalaryApproving
+            {
+                ClientId = action.ClientId
+            };
+            _context.SalaryApprovings.Add(salaryApproving);*/
+            action.Canceled = true;
+            _context.SalaryRejectingBySpecialistActions.Update(action);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("SalaryRejectingBySpecialistActions", "Manager", new { specialistId = action.SpecialistId });
         }
     }
 }

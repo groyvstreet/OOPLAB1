@@ -2,9 +2,8 @@
 
 namespace Lab1.Models.Entities.Actions
 {
-    public class BalanceTransferAction
+    public class BalanceTransferAction : Action
     {
-        [Key] public string Id { get; set; } = Guid.NewGuid().ToString();
         public double Money { get; set; }
         public string BankIdFrom { get; set; }
         public string BankIdTo { get; set; }
@@ -18,6 +17,5 @@ namespace Lab1.Models.Entities.Actions
         public string? BalanceIdTo { get; set; }
         public string BalanceNameFrom { get; set; }
         public string BalanceNameTo { get; set; }
-        public bool Canceled { get; set; }
     }
 }
