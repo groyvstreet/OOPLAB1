@@ -98,7 +98,7 @@ namespace Lab1.Controllers
                     switch (user.RoleName)
                     {
                         case "admin":
-                            return RedirectToAction("Index", "Home");
+                            return RedirectToAction("SignUp", "Admin");
                         case "client":
                             return RedirectToAction("SignUp", "Client");
                         case "manager":
@@ -122,7 +122,7 @@ namespace Lab1.Controllers
             switch (user.RoleName)
             {
                 case "admin":
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Profile", "Admin");
                 case "client":
                     var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     if(client == null)

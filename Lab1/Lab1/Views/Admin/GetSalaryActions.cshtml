@@ -1,0 +1,43 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.GetSalaryActionsAdminModel
+
+<form asp-action="Clients" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Получение заработной платы</caption>
+        <tr>
+            <th>Наименование счета</th>
+            <th>Сумма перевода</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.BalanceName</td>
+                <td>@action.Money</td>
+                @if (!action.Canceled)
+                {
+                    <td>
+                        <form asp-action="CancelGetSalaryAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Клиент не получал заработную плату</p>
+}

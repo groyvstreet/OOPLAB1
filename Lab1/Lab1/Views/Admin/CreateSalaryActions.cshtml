@@ -1,0 +1,38 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.CreateSalaryActionsAdminModel
+
+<form asp-action="Clients" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Подачи документов</caption>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>Подача документов на заработный проект</td>
+                @if (!action.Canceled)
+                {
+                    <td>
+                        <form asp-action="CancelCreateSalaryAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Подач документов нет</p>
+}

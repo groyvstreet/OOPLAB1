@@ -49,7 +49,8 @@ namespace Lab1.Models.Data
 
             for (int i = 0; i < 3; i++)
             {
-                context.Admins.Add(new Admin
+                //Admins
+                context.Users.Add(new User
                 {
                     Email = "admin@mail.ru",
                     FirstName = "admin",

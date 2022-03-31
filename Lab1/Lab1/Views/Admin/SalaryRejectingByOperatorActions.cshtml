@@ -1,0 +1,47 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.SalaryRejectingByOperatorActionsAdminModel
+
+<form asp-action="Operators" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Отклонения отправки документов клиента оператором</caption>
+        <tr>
+            <th>Время</th>
+            <th>Наименование компании</th>
+            <th>Почта оператора</th>
+            <th>Почта клиента</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.Time</td>
+                <td>@action.CompanyName</td>
+                <td>@action.UserEmail</td>
+                <td>@action.ClientEmail</td>
+                @if (action.Canceled)
+                {
+                    <td>Действие отменено</td>
+                }
+                else
+                {
+                    <td>
+                        <form asp-action="CancelSalaryRejectingByOperatorAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Действий нет</p>
+}

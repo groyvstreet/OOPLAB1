@@ -115,8 +115,8 @@ namespace Lab1.Controllers
                 specialist.CompanyId);
             var salaryApprovingBySpecialistAction = new SalaryApprovingBySpecialistAction
             {
-                SpecialistId = specialist.Id,
-                SpecialistEmail = specialist.Email,
+                UserId = specialist.Id,
+                UserEmail = specialist.Email,
                 ClientId = client.Id,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,
@@ -143,8 +143,8 @@ namespace Lab1.Controllers
                 specialist.CompanyId);
             var salaryRejectingingBySpecialistAction = new SalaryRejectingBySpecialistAction
             {
-                SpecialistId = specialist.Id,
-                SpecialistEmail = specialist.Email,
+                UserId = specialist.Id,
+                UserEmail = specialist.Email,
                 ClientId = client.Id,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,

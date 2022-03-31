@@ -1,0 +1,57 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.ManagersAdminModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Managers.Any())
+{
+    <table cellpadding="10">
+        <caption>Список менеджеров</caption>
+        @foreach (var manager in Model.Managers)
+        {
+            <tr>
+                <td>
+                    <div>Email: @manager.Email</div>
+                    <div>Имя: @manager.FirstName</div>
+                    <div>Фамилия: @manager.LastName</div>
+                    <div>Отчество: @manager.Patronymic</div>
+                    <div>Номер телефона: @manager.PhoneNumber</div>
+                </td>
+                <td>
+                    <form asp-action="BlockDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Блокировки вкладов">
+                    </form>
+                    <form asp-action="UnblockDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Разблокировки вкладов">
+                    </form>
+                    <form asp-action="FreezeDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Замораживания вкладов">
+                    </form>
+                    <form asp-action="UnfreezeDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Размораживания вкладов">
+                    </form>
+                    <form asp-action="SalaryApprovingByManagerActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Подтверждения оптравки документов">
+                    </form>
+                    <form asp-action="SalaryRejectingByManagerActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="managerId" value="@manager.Id" />
+                        <input type="submit" value="Отклонения оптравки документов">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Зарегистрированных менеджеров нет</p>
+}

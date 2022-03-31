@@ -28,6 +28,23 @@ namespace Lab1.Models.Data
         public DbSet<BalanceTransferAction> BalanceTransferActions { get; set; }
         public DbSet<SalaryApprovingBySpecialistAction> SalaryApprovingBySpecialistActions { get; set; }
         public DbSet<SalaryRejectingBySpecialistAction> SalaryRejectingBySpecialistActions { get; set; }
+        public DbSet<BlockDepositAction> BlockDepositActions { get; set; }
+        public DbSet<FreezeDepositAction> FreezeDepositActions { get; set; }
+        public DbSet<UnblockDepositAction> UnblockDepositActions { get; set; }
+        public DbSet<UnfreezeDepositAction> UnfreezeDepositActions { get; set; }
+        public DbSet<CreateDepositAction> CreateDepositActions { get; set; }
+        public DbSet<GetDepositAction> GetDepositActions { get; set; }
+        public DbSet<AddDepositAction> AddDepositActions { get; set; }
+        public DbSet<TransferDepositAction> TransferDepositActions { get; set; }
+        public DbSet<CreateSalaryAction> CreateSalaryActions { get; set; }
+        public DbSet<GetSalaryAction> GetSalaryActions { get; set; }
+        public DbSet<SalaryApprovingByOperatorAction> SalaryApprovingByOperatorActions { get; set; }
+        public DbSet<SalaryRejectingByOperatorAction> SalaryRejectingByOperatorActions { get; set; }
+        public DbSet<OpenBalanceAction> OpenBalanceActions { get; set; }
+        public DbSet<CloseBalanceAction> CloseBalanceActions { get; set; }
+        public DbSet<AddBalanceAction> AddBalanceActions { get; set; }
+        public DbSet<CreateInstallmentAction> CreateInstallmentActions { get; set;}
+        public DbSet<PayInstallmentAction> PayInstallmentActions { get; set;}
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

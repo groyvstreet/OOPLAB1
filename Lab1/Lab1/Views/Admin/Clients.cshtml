@@ -1,0 +1,92 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.ClientsAdminModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Clients.Any())
+{
+    <table cellpadding="10">
+        <caption>Список клиентов</caption>
+        @foreach (var client in Model.Clients)
+        {
+            <tr>
+                <td>
+                    <div>Email: @client.Email</div>
+                    <div>Имя: @client.FirstName</div>
+                    <div>Фамилия: @client.LastName</div>
+                    <div>Отчество: @client.Patronymic</div>
+                    <div>Номер телефона: @client.PhoneNumber</div>
+                    <div>Серия паспорта: @client.PassportSeries</div>
+                    <div>Номер паспорта: @client.PassportNumber</div>
+                    <div>Идентификационный номер: @client.IdentificationNumber</div>
+                </td>
+                <td>
+                    <form asp-action="CreateDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Создания вкладов">
+                    </form>
+                    <form asp-action="GetDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Снятие денег с вкладов">
+                    </form>
+                    <form asp-action="AddDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Пополнения вкладов">
+                    </form>
+                    <form asp-action="TransferDepositActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Переводы вкладов">
+                    </form>
+                    <form asp-action="TransferBalanceActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Переводы счетов">
+                    </form>
+                    <form asp-action="CreateSalaryActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Подачи документов">
+                    </form>
+                    <form asp-action="GetSalaryActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Получение заработной платы">
+                    </form>
+                    <form asp-action="OpenBalanceActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Открытия счетов">
+                    </form>
+                    <form asp-action="AddBalanceActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Пополнения счетов">
+                    </form>
+                    <form asp-action="CloseBalanceActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Закрытия счетов">
+                    </form>
+                    <form asp-action="CreateInstallmentActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Взятия рассрочек">
+                    </form>
+                    <form asp-action="PayInstallmentActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Оплата рассрочек">
+                    </form>
+                    <form asp-action="CreateCreditActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Взятия кредитов">
+                    </form>
+                    <form asp-action="PayCreditActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="clientId" value="@client.Id" />
+                        <input type="submit" value="Оплата кредитов">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Зарегистрированных клиентов нет</p>
+}

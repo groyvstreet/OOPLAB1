@@ -1,0 +1,49 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.GetDepositActionsAdminModel
+
+<form asp-action="Clients" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Снятия денег с вкладов</caption>
+        <tr>
+            <th>Клиент</th>
+            <th>Снятая сумма</th>
+            <th>Процент</th>
+            <th>Время открытия вклада</th>
+            <th>Время закрытия вклада</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.UserEmail</td>
+                <td>@action.Money</td>
+                <td>@action.Percent</td>
+                <td>@action.OpenedTime</td>
+                <td>@action.ClosedTime</td>
+                @if (!action.Canceled)
+                {
+                    <td>
+                        <form asp-action="CancelGetDepositAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Снятий денег с вкладов нет</p>
+}

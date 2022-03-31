@@ -44,6 +44,15 @@ namespace Lab1.Controllers
                         .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     client.Balances.Add(balance);
                     _context.Clients.Update(client);
+                    var openBalanceAction = new OpenBalanceAction
+                    {
+                        UserId = client.Id,
+                        UserEmail = client.Email,
+                        BalanceId = balance.Id,
+                        BalanceName = balance.Name,
+                        Info = $"Клиент {client.Email} открыл счет {balance.Name} с денежной суммой в размере {model.Money}."
+                    };
+                    _context.OpenBalanceActions.Add(openBalanceAction);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Client");
                 case "specialist":
@@ -87,6 +96,16 @@ namespace Lab1.Controllers
                         }
                         _context.BalanceTransferActions.Update(balanceTransferAction);
                     }
+                    var closeBalanceAction = new CloseBalanceAction
+                    {
+                        UserId = client.Id,
+                        UserEmail = client.Email,
+                        BalanceId = cBalance.Id,
+                        BalanceName = cBalance.Name,
+                        Money = cBalance.Money,
+                        Info = $"Клиент {client.Email} закрыл счет {cBalance.Name} с денежной суммой в размере {cBalance.Money}."
+                    };
+                    _context.CloseBalanceActions.Add(closeBalanceAction);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Client");
                 case "specialist":
@@ -143,6 +162,16 @@ namespace Lab1.Controllers
                     client.Balances.Remove(cBalance);
                     client.Balances.Add(cBalance);
                     _context.Clients.Update(client);
+                    var addBalanceAction = new AddBalanceAction
+                    {
+                        UserId = client.Id,
+                        UserEmail = client.Email,
+                        BalanceId = cBalance.Id,
+                        BalanceName = cBalance.Name,
+                        Money = model.Money,
+                        Info = $"Клиент {client.Email} пополнил счет {cBalance.Name} на денежную сумму в размере {model.Money}."
+                    };
+                    _context.AddBalanceActions.Add(addBalanceAction);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Profile", "Client");
                 case "specialist":
@@ -225,7 +254,7 @@ namespace Lab1.Controllers
                     balanceTransferAction.BankIdTo = bankTo.Id;
                     balanceTransferAction.BankNameFrom = bankFrom.Name;
                     balanceTransferAction.BankNameTo = bankTo.Name;
-                    balanceTransferAction.UserIdFrom = clientFrom.Id;
+                    balanceTransferAction.UserId = clientFrom.Id;
                     balanceTransferAction.UserIdTo = clientTo.Id;
                     balanceTransferAction.UserEmailFrom = clientFrom.Email;
                     balanceTransferAction.UserEmailTo = clientTo.Email;
