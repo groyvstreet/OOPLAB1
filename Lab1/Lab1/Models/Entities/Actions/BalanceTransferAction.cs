@@ -9,7 +9,6 @@ namespace Lab1.Models.Entities.Actions
         public string BankIdTo { get; set; }
         public string BankNameFrom { get; set; }
         public string BankNameTo { get; set; }
-        public string UserIdFrom { get; set; }
         public string UserIdTo { get; set; }
         public string UserEmailFrom { get; set; }
         public string UserEmailTo { get; set; }

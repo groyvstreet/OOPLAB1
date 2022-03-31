@@ -1,6 +1,7 @@
 ﻿using Lab1.Models.Data;
 using Lab1.Models.DepositModels;
 using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,16 @@ namespace Lab1.Controllers
                 _context.Deposits.Add(deposit);
                 client.Deposits.Add(deposit);
                 _context.Clients.Update(client);
+                var createDepositAction = new CreateDepositAction
+                {
+                    UserId = client.Id,
+                    UserEmail = client.Email,
+                    DepositId = deposit.Id,
+                    Money = deposit.Money,
+                    Percent = deposit.Percent,
+                    Info = $"Клиент {client.Email} создал вклад на сумму {deposit.Money} под процент {deposit.Percent}."
+                };
+                _context.CreateDepositActions.Add(createDepositAction);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Profile", "Client");
             }
@@ -83,6 +94,19 @@ namespace Lab1.Controllers
                 client.Deposits.Add(deposit);
                 _context.Deposits.Update(deposit);
                 _context.Clients.Update(client);
+                var addDepositAction = new AddDepositAction
+                {
+                    UserId = client.Id,
+                    UserEmail = client.Email,
+                    DepositId = deposit.Id,
+                    Money = deposit.Money,
+                    Percent = deposit.Percent,
+                    OpenedTime = deposit.OpenedTime,
+                    ClosedTime = deposit.ClosedTime,
+                    AddedMoney = model.Money,
+                    Info = $"Клиент {client.Email} пополнил вклад на сумму {deposit.Money}."
+                };
+                _context.AddDepositActions.Add(addDepositAction);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Profile", "Client");
             }
@@ -127,7 +151,25 @@ namespace Lab1.Controllers
                 client.Deposits.Remove(depositFrom);
                 client.Deposits.Add(depositTo);
                 _context.Clients.Update(client);
-                _context.SaveChanges();
+                var transferDepositAction = new TransferDepositAction
+                {
+                    UserId = client.Id,
+                    UserEmail = client.Email,
+                    DepositId = depositFrom.Id,
+                    Money = depositFrom.Money,
+                    Percent = depositFrom.Percent,
+                    OpenedTime = depositFrom.OpenedTime,
+                    ClosedTime = depositFrom.ClosedTime,
+                    DepositIdTo = depositTo.Id,
+                    DepositToMoney = depositTo.Money,
+                    DepositToPercent = depositTo.Percent,
+                    DepositToOpenedTime = depositTo.OpenedTime,
+                    DepositToClosedTime = depositTo.ClosedTime,
+                    TransferMoney = Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2),
+                    Info = $"Клиент {client.Email} перевел вклад на сумму {depositFrom.Money} с процентом {depositFrom.Percent} ко вкладу на сумму {depositTo.Money} с процентом {depositTo.Percent}."
+                };
+                _context.TransferDepositActions.Add(transferDepositAction);
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Profile", "Client");
             }
             ViewBag.DepositId = depositFrom.Id;
@@ -183,10 +225,33 @@ namespace Lab1.Controllers
             client.Deposits.Remove(deposit);
             var balance = client.Balances.FirstOrDefault(d => d.Id == model.BalanceId);
             client.Balances.Remove(balance);
-            balance.Money += model.Money;
+            var getDepositAction = new GetDepositAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                DepositId = deposit.Id,
+                Money = deposit.Money,
+                Percent = deposit.Percent,
+                OpenedTime = deposit.OpenedTime,
+                ClosedTime = deposit.ClosedTime,
+                BalanceId = balance.Id,
+                Info = $"Клиент {client.Email} снял деньги с вклада на сумму {deposit.Money}."
+            };
+            if (DateTime.Now >= deposit.ClosedTime)
+            {
+                deposit.Money = Math.Round((deposit.Percent + 100) * deposit.Money / 100, 2);
+            }
+            else
+            {
+                deposit.Money = Math.Round(((DateTime.Now - deposit.OpenedTime) / (deposit.ClosedTime - deposit.OpenedTime)
+                    * (deposit.Percent) + 100) * deposit.Money / 100, 2);
+            }
+            getDepositAction.MoneyWithPercent = deposit.Money;
+            balance.Money += deposit.Money;
             _context.Balances.Update(balance);
             client.Balances.Add(balance);
             _context.Clients.Update(client);
+            _context.GetDepositActions.Add(getDepositAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
         }

@@ -4,6 +4,7 @@ using Lab1.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Lab1.Models.Entities.Actions;
 
 namespace Lab1.Controllers
 {
@@ -102,6 +103,23 @@ namespace Lab1.Controllers
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
+            var payInstallmentAction = new PayInstallmentAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                InstallmentId = installment.Id,
+                Money = installment.Money,
+                PayMoney = installment.PayMoney,
+                Months = installment.Months,
+                PayedMonths = installment.PayedMonths,
+                CreatingTime = installment.CreatingTime,
+                PaymentTime = installment.PaymentTime,
+                BalanceId = balance.Id,
+                BalanceName = balance.Name,
+                SinglePaymentMoney = installment.PayMoney,
+                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {installment.PayMoney}."
+            };
+            _context.PayInstallmentActions.Add(payInstallmentAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
         }
@@ -142,6 +160,23 @@ namespace Lab1.Controllers
                 };
                 return View(model);
             }
+            var payInstallmentAction = new PayInstallmentAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                InstallmentId = installment.Id,
+                Money = installment.Money,
+                PayMoney = installment.PayMoney,
+                Months = installment.Months,
+                PayedMonths = installment.PayedMonths,
+                CreatingTime = installment.CreatingTime,
+                PaymentTime = installment.PaymentTime,
+                BalanceId = balance.Id,
+                BalanceName = balance.Name,
+                SinglePaymentMoney = payMoney,
+                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {payMoney}."
+            };
+            _context.PayInstallmentActions.Add(payInstallmentAction);
             client.Balances.Remove(balance);
             balance.Money -= payMoney;
             balance.Money = Math.Round(balance.Money, 2,

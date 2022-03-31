@@ -1,5 +1,6 @@
 ﻿using Lab1.Models.Data;
 using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Lab1.Models.OperatorModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -94,6 +95,25 @@ namespace Lab1.Controllers
             _context.Clients.Update(client);
             var salaryApproving = await _context.SalaryApprovings.FirstOrDefaultAsync(s => s.ClientId == clientId);
             _context.SalaryApprovings.Remove(salaryApproving);
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == client.CompanyId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
+            var salaryApprovingByOperatorAction = new SalaryApprovingByOperatorAction
+            {
+                UserId = user.Id,
+                UserEmail = user.Email,
+                ClientId = clientId,
+                ClientEmail = client.Email,
+                CompanyName = company.LegalName,
+            };
+            if(user.RoleName == "operator")
+            {
+                salaryApprovingByOperatorAction.Info = $"Оператор {user.Email} подтвердил отправку документов клиента {client.Email}.";
+            }
+            else
+            {
+                salaryApprovingByOperatorAction.Info = $"Менеджер {user.Email} подтвердил отправку документов клиента {client.Email}.";
+            }
+            _context.SalaryApprovingByOperatorActions.Add(salaryApprovingByOperatorAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovings", "Operator");
         }
@@ -108,6 +128,25 @@ namespace Lab1.Controllers
             _context.Clients.Update(client);
             var salaryApproving = await _context.SalaryApprovings.FirstOrDefaultAsync(s => s.ClientId == clientId);
             _context.SalaryApprovings.Remove(salaryApproving);
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == client.CompanyId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
+            var salaryRejectingByOperatorAction = new SalaryRejectingByOperatorAction
+            {
+                UserId = user.Id,
+                UserEmail = user.Email,
+                ClientId = clientId,
+                ClientEmail = client.Email,
+                CompanyName = company.LegalName,
+            };
+            if (user.RoleName == "operator")
+            {
+                salaryRejectingByOperatorAction.Info = $"Оператор {user.Email} отклонил отправку документов клиента {client.Email}.";
+            }
+            else
+            {
+                salaryRejectingByOperatorAction.Info = $"Менеджер {user.Email} отклонил отправку документов клиента {client.Email}.";
+            }
+            _context.SalaryRejectingByOperatorActions.Add(salaryRejectingByOperatorAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovings", "Operator");
         }
@@ -130,7 +169,7 @@ namespace Lab1.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == 
                 User.Identity.Name);
             var balanceTransferActions = _context.BalanceTransferActions
-                .Where(a => (a.UserIdFrom == clientId || a.UserIdTo == clientId) &&
+                .Where(a => (a.UserId == clientId || a.UserIdTo == clientId) &&
                     a.BankIdFrom == user.BankId).ToList();
             var model = new ClientBalanceTransferActionOperatorModel
             {
@@ -147,11 +186,11 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(a => a.Id == actionId);
             if (action.BalanceIdFrom == null || action.BalanceIdTo == null || action.Canceled == true)
             {
-                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });
             }
             var clientFrom = await _context.Clients
                 .Include(c => c.Balances)
-                .FirstOrDefaultAsync(c => c.Id == action.UserIdFrom);
+                .FirstOrDefaultAsync(c => c.Id == action.UserId);
             var clientTo = await _context.Clients
                 .Include(c => c.Balances)
                 .FirstOrDefaultAsync(c => c.Id == action.UserIdTo);
@@ -161,7 +200,7 @@ namespace Lab1.Controllers
                 action.BalanceIdTo);
             if (balanceTo.Money < action.Money)
             {
-                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });
             }
             
             clientFrom.Balances.Remove(balanceFrom);
@@ -179,7 +218,7 @@ namespace Lab1.Controllers
             _context.Clients.Update(clientFrom);
             _context.Clients.Update(clientTo);
             await _context.SaveChangesAsync();
-            return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserIdFrom });
+            return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });
         }
     }
 }

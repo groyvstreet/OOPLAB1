@@ -1,0 +1,41 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.OperatorsAdminModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Operators.Any())
+{
+    <table cellpadding="10">
+        <caption>Список операторов</caption>
+        @foreach (var _operator in Model.Operators)
+        {
+            <tr>
+                <td>
+                    <div>Email: @_operator.Email</div>
+                    <div>Имя: @_operator.FirstName</div>
+                    <div>Фамилия: @_operator.LastName</div>
+                    <div>Отчество: @_operator.Patronymic</div>
+                    <div>Номер телефона: @_operator.PhoneNumber</div>
+                </td>
+                <td>
+                    <form asp-action="SalaryApprovingByOperatorActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="operatorId" value="@_operator.Id" />
+                        <input type="submit" value="Подтверждения оптравки документов">
+                    </form>
+                    <form asp-action="SalaryRejectingByOperatorActions" asp-controller="Admin" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="operatorId" value="@_operator.Id" />
+                        <input type="submit" value="Отклонения оптравки документов">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Зарегистрированных операторов нет</p>
+}

@@ -1,0 +1,53 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.CreateInstallmentActionsAdminModel
+
+<form asp-action="Clients" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Взятия рассрочек</caption>
+        <tr>
+            <th>Клиент</th>
+            <th>Сумма</th>
+            <th>Выплачиваемая сумма</th>
+            <th>Время взятия рассрочки</th>
+            <th>Время выплаты рассрочки</th>
+            <th>Месяцы</th>
+            <th>Выплаченные месяцы</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.UserEmail</td>
+                <td>@action.Money</td>
+                <td>@action.PayMoney</td>
+                <td>@action.CreatingTime</td>
+                <td>@action.PaymentTime</td>
+                <td>@action.Months</td>
+                <td>@action.PayedMonths</td>
+                @if (!action.Canceled)
+                {
+                    <td>
+                        <form asp-action="CancelCreateInstallmentAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Взятий рассрочек нет</p>
+}

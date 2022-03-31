@@ -8,5 +8,7 @@ namespace Lab1.Models.Entities.Actions
         public DateTime Time { get; set; } = DateTime.Now;
         public string Info { get; set; }
         public bool Canceled { get; set; }
+        public string UserId { get; set; }
+        public string UserEmail { get; set; }
     }
 }

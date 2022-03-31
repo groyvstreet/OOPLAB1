@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab1.Models.Entities;
 using Lab1.Models.ClientModels;
+using Lab1.Models.Entities.Actions;
 
 namespace Lab1.Controllers
 {
@@ -141,6 +142,13 @@ namespace Lab1.Controllers
                 ClientId = client.Id
             };
             _context.SalaryApprovings.Add(salaryApproving);
+            var createSalaryAction = new CreateSalaryAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                Info = $"Клиент {client.Email} подал документы на зарплатный проект."
+            };
+            _context.CreateSalaryActions.Add(createSalaryAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
         }
@@ -158,6 +166,16 @@ namespace Lab1.Controllers
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
+            var getSalaryAction = new GetSalaryAction
+            {
+                UserId= client.Id,
+                UserEmail= client.Email,
+                Money = client.Salary.Money,
+                BalanceId = balanceId,
+                BalanceName = balance.Name,
+                Info = $"Клиент {client.Email} получил заработную плату на сумму {client.Salary.Money}."
+            };
+            _context.GetSalaryActions.Add(getSalaryAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
         }

@@ -1,0 +1,54 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.FreezeDepositActionsAdminModel
+
+<form asp-action="Managers" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Замораживания вкладов</caption>
+        <tr>
+            <th>Менеджер</th>
+            <th>Клиент</th>
+            <th>Сумма вклада</th>
+            <th>Процент</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.UserEmail</td>
+                <td>@action.ClientEmail</td>
+                <td>@action.Money</td>
+                <td>@action.Percent</td>
+                @if (!action.Canceled)
+                {
+                    @if (!action.Closed)
+                    {
+                        <td>
+                            <form asp-action="CancelFreezeDepositAction" asp-controller="Admin" asp-anti-forgery="true">
+                                <input type="hidden" name="actionId" value="@action.Id" />
+                                <input type="submit" value="Отменить">
+                            </form>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>Вклад закрыт</td>
+                    }
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Замораживаний вкладов нет</p>
+}

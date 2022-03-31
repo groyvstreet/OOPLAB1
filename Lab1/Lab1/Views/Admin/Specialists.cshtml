@@ -1,0 +1,45 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.SpecialistsAdminModel
+
+<form asp-action="Profile" asp-controller="User" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Specialists.Any())
+{
+    <table cellpadding="10">
+        <caption>Список специалистов</caption>
+        @foreach (var specialist in Model.Specialists)
+        {
+            <tr>
+                <td>
+                    <div>Email: @specialist.Email</div>
+                    <div>Имя: @specialist.FirstName</div>
+                    <div>Фамилия: @specialist.LastName</div>
+                    <div>Отчество: @specialist.Patronymic</div>
+                    <div>Номер телефона: @specialist.PhoneNumber</div>
+                </td>
+                <td>
+                    <form asp-action="SpecialistBalanceTransferActions" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Переводы">
+                    </form>
+                    <form asp-action="SalaryApprovingBySpecialistActions" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Подтверждения подачи документов">
+                    </form>
+                    <form asp-action="SalaryRejectingBySpecialistActions" asp-controller="Manager" asp-anti-forgery="true" method="get">
+                        <input type="hidden" name="specialistId" value="@specialist.Id" />
+                        <input type="submit" value="Отклонения подачи документов">
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Зарегистрированных специалистов нет</p>
+}
