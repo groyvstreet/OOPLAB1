@@ -50,7 +50,8 @@ namespace Lab1.Controllers
                         UserEmail = client.Email,
                         BalanceId = balance.Id,
                         BalanceName = balance.Name,
-                        Info = $"Клиент {client.Email} открыл счет {balance.Name} с денежной суммой в размере {model.Money}."
+                        Info = $"Клиент {client.Email} открыл счет {balance.Name} с денежной суммой в размере {model.Money}.",
+                        Type = "OpenBalance"
                     };
                     _context.OpenBalanceActions.Add(openBalanceAction);
                     await _context.SaveChangesAsync();
@@ -103,7 +104,8 @@ namespace Lab1.Controllers
                         BalanceId = cBalance.Id,
                         BalanceName = cBalance.Name,
                         Money = cBalance.Money,
-                        Info = $"Клиент {client.Email} закрыл счет {cBalance.Name} с денежной суммой в размере {cBalance.Money}."
+                        Info = $"Клиент {client.Email} закрыл счет {cBalance.Name} с денежной суммой в размере {cBalance.Money}.",
+                        Type = "CloseBalance"
                     };
                     _context.CloseBalanceActions.Add(closeBalanceAction);
                     await _context.SaveChangesAsync();
@@ -169,7 +171,8 @@ namespace Lab1.Controllers
                         BalanceId = cBalance.Id,
                         BalanceName = cBalance.Name,
                         Money = model.Money,
-                        Info = $"Клиент {client.Email} пополнил счет {cBalance.Name} на денежную сумму в размере {model.Money}."
+                        Info = $"Клиент {client.Email} пополнил счет {cBalance.Name} на денежную сумму в размере {model.Money}.",
+                        Type = "AddBalance"
                     };
                     _context.AddBalanceActions.Add(addBalanceAction);
                     await _context.SaveChangesAsync();

@@ -1,6 +1,7 @@
 ﻿using Lab1.Models.CreditModels;
 using Lab1.Models.Data;
 using Lab1.Models.Entities;
+using Lab1.Models.Entities.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -121,6 +122,25 @@ namespace Lab1.Controllers
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
+            var payCreditAction = new PayCreditAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                CreditId = credit.Id,
+                Money = credit.Money,
+                MoneyWithPercent = credit.MoneyWithPercent,
+                Months = credit.Months,
+                PayedMonths = credit.PayedMonths,
+                Fines = credit.Fines,
+                CreatingTime = credit.CreatingTime,
+                PaymentTime = credit.PaymentTime,
+                BalanceId = balance.Id,
+                BalanceName = balance.Name,
+                SinglePaymentMoney = credit.MoneyWithPercent,
+                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {credit.MoneyWithPercent}.",
+                Type = "PayInstallment"
+            };
+            _context.PayCreditActions.Add(payCreditAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
         }
@@ -178,6 +198,25 @@ namespace Lab1.Controllers
                 };
                 return View(model);
             }
+            var payCreditAction = new PayCreditAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                CreditId = credit.Id,
+                Money = credit.Money,
+                MoneyWithPercent = credit.MoneyWithPercent,
+                Months = credit.Months,
+                PayedMonths = credit.PayedMonths,
+                Fines = credit.Fines,
+                CreatingTime = credit.CreatingTime,
+                PaymentTime = credit.PaymentTime,
+                BalanceId = balance.Id,
+                BalanceName = balance.Name,
+                SinglePaymentMoney = payMoney,
+                Info = $"Клиент {client.Email} выплатил сумму кредита в размере {payMoney}.",
+                Type = "PayCredit"
+            };
+            _context.PayCreditActions.Add(payCreditAction);
             client.Balances.Remove(balance);
             balance.Money -= payMoney;
             balance.Money = Math.Round(balance.Money, 2,

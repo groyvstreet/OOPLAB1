@@ -120,7 +120,8 @@ namespace Lab1.Controllers
                 ClientId = client.Id,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,
-                Info = $"Специалист {specialist.Email} подтвердил отправку документов клиента {client.Email}."
+                Info = $"Специалист {specialist.Email} подтвердил отправку документов клиента {client.Email}.",
+                Type = "SalaryApprovingBySpecialist"
             };
             _context.SalaryApprovingBySpecialistActions.Add(salaryApprovingBySpecialistAction);
             await _context.SaveChangesAsync();
@@ -148,7 +149,8 @@ namespace Lab1.Controllers
                 ClientId = client.Id,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,
-                Info = $"Специалист {specialist.Email} отклонил отправку документов клиента {client.Email}."
+                Info = $"Специалист {specialist.Email} отклонил отправку документов клиента {client.Email}.",
+                Type = "SalaryRejectingBySpecialist"
             };
             _context.SalaryRejectingBySpecialistActions.Add(salaryRejectingingBySpecialistAction);
             await _context.SaveChangesAsync();

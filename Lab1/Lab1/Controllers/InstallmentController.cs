@@ -117,7 +117,8 @@ namespace Lab1.Controllers
                 BalanceId = balance.Id,
                 BalanceName = balance.Name,
                 SinglePaymentMoney = installment.PayMoney,
-                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {installment.PayMoney}."
+                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {installment.PayMoney}.",
+                Type = "PayInstallment"
             };
             _context.PayInstallmentActions.Add(payInstallmentAction);
             await _context.SaveChangesAsync();
@@ -174,7 +175,8 @@ namespace Lab1.Controllers
                 BalanceId = balance.Id,
                 BalanceName = balance.Name,
                 SinglePaymentMoney = payMoney,
-                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {payMoney}."
+                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {payMoney}.",
+                Type = "PayInstallment"
             };
             _context.PayInstallmentActions.Add(payInstallmentAction);
             client.Balances.Remove(balance);

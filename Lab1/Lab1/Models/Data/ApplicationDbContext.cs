@@ -45,6 +45,9 @@ namespace Lab1.Models.Data
         public DbSet<AddBalanceAction> AddBalanceActions { get; set; }
         public DbSet<CreateInstallmentAction> CreateInstallmentActions { get; set;}
         public DbSet<PayInstallmentAction> PayInstallmentActions { get; set;}
+        public DbSet<CreateCreditAction> CreateCreditActions { get; set; }
+        public DbSet<PayCreditAction> PayCreditActions { get; set; }
+        public DbSet<Entities.Actions.Action> Actions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

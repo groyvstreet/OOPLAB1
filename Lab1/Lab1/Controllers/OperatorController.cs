@@ -104,6 +104,7 @@ namespace Lab1.Controllers
                 ClientId = clientId,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,
+                Type = "SalaryApprovingByOperator"
             };
             if(user.RoleName == "operator")
             {
@@ -137,6 +138,7 @@ namespace Lab1.Controllers
                 ClientId = clientId,
                 ClientEmail = client.Email,
                 CompanyName = company.LegalName,
+                Type = "SalaryRejectingByOperator"
             };
             if (user.RoleName == "operator")
             {
