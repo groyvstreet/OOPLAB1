@@ -63,7 +63,8 @@ namespace Lab1.Controllers
                     DepositId = deposit.Id,
                     Money = deposit.Money,
                     Percent = deposit.Percent,
-                    Info = $"Клиент {client.Email} создал вклад на сумму {deposit.Money} под процент {deposit.Percent}."
+                    Info = $"Клиент {client.Email} создал вклад на сумму {deposit.Money} под процент {deposit.Percent}.",
+                    Type = "CreateDeposit"
                 };
                 _context.CreateDepositActions.Add(createDepositAction);
                 await _context.SaveChangesAsync();
@@ -104,7 +105,8 @@ namespace Lab1.Controllers
                     OpenedTime = deposit.OpenedTime,
                     ClosedTime = deposit.ClosedTime,
                     AddedMoney = model.Money,
-                    Info = $"Клиент {client.Email} пополнил вклад на сумму {deposit.Money}."
+                    Info = $"Клиент {client.Email} пополнил вклад на сумму {deposit.Money}.",
+                    Type = "AddDeposit"
                 };
                 _context.AddDepositActions.Add(addDepositAction);
                 await _context.SaveChangesAsync();
@@ -166,7 +168,8 @@ namespace Lab1.Controllers
                     DepositToOpenedTime = depositTo.OpenedTime,
                     DepositToClosedTime = depositTo.ClosedTime,
                     TransferMoney = Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2),
-                    Info = $"Клиент {client.Email} перевел вклад на сумму {depositFrom.Money} с процентом {depositFrom.Percent} ко вкладу на сумму {depositTo.Money} с процентом {depositTo.Percent}."
+                    Info = $"Клиент {client.Email} перевел вклад на сумму {depositFrom.Money} с процентом {depositFrom.Percent} ко вкладу на сумму {depositTo.Money} с процентом {depositTo.Percent}.",
+                    Type = "TransferDeposit"
                 };
                 _context.TransferDepositActions.Add(transferDepositAction);
                 await _context.SaveChangesAsync();
@@ -235,7 +238,8 @@ namespace Lab1.Controllers
                 OpenedTime = deposit.OpenedTime,
                 ClosedTime = deposit.ClosedTime,
                 BalanceId = balance.Id,
-                Info = $"Клиент {client.Email} снял деньги с вклада на сумму {deposit.Money}."
+                Info = $"Клиент {client.Email} снял деньги с вклада на сумму {deposit.Money}.",
+                Type = "GetDeposit"
             };
             if (DateTime.Now >= deposit.ClosedTime)
             {

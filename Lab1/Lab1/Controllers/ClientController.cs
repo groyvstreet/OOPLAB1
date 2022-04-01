@@ -146,7 +146,8 @@ namespace Lab1.Controllers
             {
                 UserId = client.Id,
                 UserEmail = client.Email,
-                Info = $"Клиент {client.Email} подал документы на зарплатный проект."
+                Info = $"Клиент {client.Email} подал документы на зарплатный проект.",
+                Type = "CreateSalary"
             };
             _context.CreateSalaryActions.Add(createSalaryAction);
             await _context.SaveChangesAsync();
@@ -173,7 +174,8 @@ namespace Lab1.Controllers
                 Money = client.Salary.Money,
                 BalanceId = balanceId,
                 BalanceName = balance.Name,
-                Info = $"Клиент {client.Email} получил заработную плату на сумму {client.Salary.Money}."
+                Info = $"Клиент {client.Email} получил заработную плату на сумму {client.Salary.Money}.",
+                Type = "GetSalary"
             };
             _context.GetSalaryActions.Add(getSalaryAction);
             await _context.SaveChangesAsync();

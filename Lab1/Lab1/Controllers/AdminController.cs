@@ -825,5 +825,191 @@ namespace Lab1.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("PayInstallmentActions", "Admin", new { clientId = action.UserId });
         }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CreateCreditActions(string? clientId)
+        {
+            var actions = _context.CreateCreditActions
+                .Where(a => a.UserId == clientId).ToList();
+            var model = new CreateCreditActionsAdminModel
+            {
+                Actions = actions
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CancelCreateCreditAction(string? actionId)
+        {
+            var action = await _context.CreateCreditActions.FirstOrDefaultAsync(a =>
+                a.Id == actionId);
+            var client = await _context.Clients
+                .Include(c => c.Credits)
+                .Include(c => c.Balances)
+                .FirstOrDefaultAsync(c => c.Id == action.UserId);
+            var credit = client.Credits.FirstOrDefault(i => i.Id == action.CreditId);
+            if (credit == null)
+            {
+                return RedirectToAction("CreateCreditActions", "Admin", new { clientId = action.UserId });
+            }
+            client.Credits.Remove(credit);
+            _context.Credits.Remove(credit);
+            var balance = client.Balances.FirstOrDefault(b => b.Id == action.BalanceId);
+            if (balance == null)
+            {
+                return RedirectToAction("CreateCreditActions", "Admin", new { clientId = action.UserId });
+            }
+            client.Balances.Remove(balance);
+            balance.Money -= action.Money;
+            client.Balances.Add(balance);
+            _context.Balances.Update(balance);
+            _context.Clients.Update(client);
+            action.Canceled = true;
+            _context.CreateCreditActions.Update(action);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("CreateCreditActions", "Admin", new { clientId = action.UserId });
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> PayCreditActions(string? clientId)
+        {
+            var actions = _context.PayCreditActions
+                .Where(a => a.UserId == clientId).ToList();
+            var model = new PayCreditActionsAdminModel
+            {
+                Actions = actions
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CancelPayCreditAction(string? actionId)
+        {
+            var action = await _context.PayCreditActions.FirstOrDefaultAsync(a =>
+                a.Id == actionId);
+            var client = await _context.Clients
+                .Include(c => c.Credits)
+                .Include(c => c.Balances)
+                .FirstOrDefaultAsync(c => c.Id == action.UserId);
+            var balance = client.Balances.FirstOrDefault(b => b.Id == action.BalanceId);
+            if (balance == null)
+            {
+                return RedirectToAction("PayCreditActions", "Admin", new { clientId = action.UserId });
+            }
+            client.Balances.Remove(balance);
+            balance.Money += action.SinglePaymentMoney;
+            client.Balances.Add(balance);
+            _context.Balances.Update(balance);
+            if (action.MoneyWithPercent <= action.SinglePaymentMoney)
+            {
+                var credit = new Credit
+                {
+                    Id = action.CreditId,
+                    Money = action.Money,
+                    MoneyWithPercent = action.SinglePaymentMoney,
+                    Months = action.Months,
+                    PayedMonths = action.PayedMonths,
+                    CreatingTime = action.CreatingTime,
+                    PaymentTime = action.PaymentTime,
+                    ClientId = client.Id,
+                    Approved = true
+                };
+                client.Credits.Add(credit);
+                _context.Credits.Add(credit);
+            }
+            else
+            {
+                var credit = client.Credits.FirstOrDefault(i => i.Id == action.CreditId);
+                if (credit == null)
+                {
+                    return RedirectToAction("PayCreditActions", "Admin", new { clientId = action.UserId });
+                }
+                client.Credits.Remove(credit);
+                credit.PayedMonths -= 1;
+                credit.MoneyWithPercent += action.SinglePaymentMoney;
+                client.Credits.Add(credit);
+                _context.Credits.Update(credit);
+            }
+            _context.Clients.Update(client);
+            action.Canceled = true;
+            _context.PayCreditActions.Update(action);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("PayCreditActions", "Admin", new { clientId = action.UserId });
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Actions()
+        {
+            var contextActions = _context.Actions.ToList();
+            var actions = new List<Models.Entities.Actions.Action>();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
+            foreach(var action in contextActions)
+            {
+                var actionUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == action.UserId);
+                if(actionUser.BankId == user.BankId)
+                {
+                    actions.Add(action);
+                }
+            }
+            var model = new ActionsAdminModel
+            {
+                Actions = actions
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> CancelAction(string actionId)
+        {
+            var action = await _context.Actions.FirstOrDefaultAsync(a => a.Id == actionId);
+            switch (action.Type)
+            {
+                case "AddBalance":
+                    return RedirectToAction("CancelAddBalanceAction", "Admin", new { actionId = actionId });
+                case "AddDeposit":
+                    return RedirectToAction("CancelAddDepositAction", "Admin", new { actionId = actionId });
+                case "TransferBalance":
+                    return RedirectToAction("CancelClientBalanceTransfer", "Operator", new { actionId = actionId });
+                case "BlockDeposit":
+                    return RedirectToAction("CancelBlockDepositAction", "Admin", new { actionId = actionId });
+                case "CloseBalance":
+                    return RedirectToAction("CancelCloseBalanceAction", "Admin", new { actionId = actionId });
+                case "CreateCredit":
+                    return RedirectToAction("CancelCreateCreditAction", "Admin", new { actionId = actionId });
+                case "CreateDeposit":
+                    return RedirectToAction("CancelCreateDepositAction", "Admin", new { actionId = actionId });
+                case "CreateInstallment":
+                    return RedirectToAction("CancelCreateInstallmentAction", "Admin", new { actionId = actionId });
+                case "CreateSalary":
+                    return RedirectToAction("CancelCreateSalaryAction", "Admin", new { actionId = actionId });
+                case "FreezeDeposit":
+                    return RedirectToAction("CancelFreezeDepositAction", "Admin", new { actionId = actionId });
+                case "GetDeposit":
+                    return RedirectToAction("CancelGetDepositAction", "Admin", new { actionId = actionId });
+                case "GetSalary":
+                    return RedirectToAction("CancelGetSalaryAction", "Admin", new { actionId = actionId });
+                case "OpenBalance":
+                    return RedirectToAction("CancelOpenBalanceAction", "Admin", new { actionId = actionId });
+                case "PayCredit":
+                    return RedirectToAction("CancelPayCreditAction", "Admin", new { actionId = actionId });
+                case "PayInstallment":
+                    return RedirectToAction("CancelPayInstallmentAction", "Admin", new { actionId = actionId });
+                case "SalaryApprovingByOperator":
+                    return RedirectToAction("CancelSalaryApprovingByOperator", "Admin", new { actionId = actionId });
+                case "SalaryApprovingBySpecialist":
+                    return RedirectToAction("CancelSalaryApprovingBySpecialist", "Admin", new { actionId = actionId });
+                case "SalaryRejectingBySpecialist":
+                    return RedirectToAction("CancelSalaryRejectingBySpecialist", "Admin", new { actionId = actionId });
+                case "SalaryRejectingByOperator":
+                    return RedirectToAction("CancelSalaryRejectingByOperator", "Admin", new { actionId = actionId });
+                case "TransferDeposit":
+                    return RedirectToAction("CancelTransferDepositAction", "Admin", new { actionId = actionId });
+                case "UnblockDeposit":
+                    return RedirectToAction("CancelUnblockDepositAction", "Admin", new { actionId = actionId });
+                case "UnfreezeDeposit":
+                    return RedirectToAction("CancelUnfreezeDepositAction", "Admin", new { actionId = actionId });
+            }
+            return RedirectToAction("Actions", "Admin");
+        }
     }
 }

@@ -1,0 +1,57 @@
+﻿@{
+}
+
+@model Lab1.Models.AdminModels.CreateCreditActionsAdminModel
+
+<form asp-action="Clients" asp-controller="Admin" asp-anti-forgery="true">
+    <input type="submit" value="Назад">
+</form>
+
+@if (Model.Actions.Any())
+{
+    <table cellpadding="10" border="1">
+        <caption>Взятия кредитов</caption>
+        <tr>
+            <th>Клиент</th>
+            <th>Сумма</th>
+            <th>Выплачиваемая сумма</th>
+            <th>Штрафные месяцы</th>
+            <th>Время взятия кредита</th>
+            <th>Время выплаты кредита</th>
+            <th>Месяцы</th>
+            <th>Выплаченные месяцы</th>
+            <th>Счет</th>
+        </tr>
+        @foreach (var action in Model.Actions)
+        {
+            <tr>
+                <td>@action.UserEmail</td>
+                <td>@action.Money</td>
+                <td>@action.MoneyWithPercent</td>
+                <td>@action.Fines</td>
+                <td>@action.CreatingTime</td>
+                <td>@action.PaymentTime</td>
+                <td>@action.Months</td>
+                <td>@action.PayedMonths</td>
+                <td>@action.BalanceName</td>
+                @if (!action.Canceled)
+                {
+                    <td>
+                        <form asp-action="CancelCreateCreditAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
+                }
+                else
+                {
+                    <td>Отменено</td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Взятий кредитов нет</p>
+}

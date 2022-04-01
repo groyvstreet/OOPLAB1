@@ -153,6 +153,24 @@ namespace Lab1.Controllers
             _context.Credits.Update(credit);
             _context.Balances.Update(balance);
             _context.CreditApprovings.Remove(creditApproving);
+            var createCreditAction = new CreateCreditAction
+            {
+                UserId = client.Id,
+                UserEmail = client.Email,
+                CreditId = credit.Id,
+                Money = credit.Money,
+                MoneyWithPercent = credit.MoneyWithPercent,
+                Months = credit.Months,
+                PayedMonths = credit.PayedMonths,
+                Fines = credit.Fines,
+                CreatingTime = credit.CreatingTime,
+                PaymentTime = credit.PaymentTime,
+                BalanceId = balance.Id,
+                BalanceName = balance.Name,
+                Info = $"Клиент {client.Email} взял кредит на сумму {credit.Money} на {credit.Months} месяцев на счет {balance.Name}.",
+                Type = "CreateCredit"
+            };
+            _context.CreateCreditActions.Add(createCreditAction);
             await _context.SaveChangesAsync();
             return RedirectToAction("CreditApprovings", "Manager");
         }
@@ -237,7 +255,8 @@ namespace Lab1.Controllers
                 PaymentTime = installment.PaymentTime,
                 BalanceId = balance.Id,
                 BalanceName = balance.Name,
-                Info = $"Клиент {client.Email} взял рассрочку на сумму {installment.Money} на {installment.Months} месяцев на счет {balance.Name}."
+                Info = $"Клиент {client.Email} взял рассрочку на сумму {installment.Money} на {installment.Months} месяцев на счет {balance.Name}.",
+                Type = "CreateInstallment"
             };
             _context.CreateInstallmentActions.Add(createInstallmentAction);
             await _context.SaveChangesAsync();
@@ -297,7 +316,8 @@ namespace Lab1.Controllers
                 ClientEmail = client.Email,
                 Money = deposit.Money,
                 Percent = deposit.Percent,
-                Info = $"Менеджер {manager.Email} заблокировал вклад клиента {client.Email}."
+                Info = $"Менеджер {manager.Email} заблокировал вклад клиента {client.Email}.",
+                Type = "BlockDeposit"
             };
             _context.BlockDepositActions.Add(blockDepositAction);
             await _context.SaveChangesAsync();
@@ -325,7 +345,8 @@ namespace Lab1.Controllers
                 ClientEmail = client.Email,
                 Money = deposit.Money,
                 Percent = deposit.Percent,
-                Info = $"Менеджер {manager.Email} разблокировал вклад клиента {client.Email}."
+                Info = $"Менеджер {manager.Email} разблокировал вклад клиента {client.Email}.",
+                Type = "UnblockDeposit"
             };
             _context.UnblockDepositActions.Add(unblockDepositAction);
             await _context.SaveChangesAsync();
@@ -353,7 +374,8 @@ namespace Lab1.Controllers
                 ClientEmail = client.Email,
                 Money = deposit.Money,
                 Percent = deposit.Percent,
-                Info = $"Менеджер {manager.Email} заморозил вклад клиента {client.Email}."
+                Info = $"Менеджер {manager.Email} заморозил вклад клиента {client.Email}.",
+                Type = "FreezeDeposit"
             };
             _context.FreezeDepositActions.Add(freezeDepositAction);
             await _context.SaveChangesAsync();
@@ -381,7 +403,8 @@ namespace Lab1.Controllers
                 ClientEmail = client.Email,
                 Money = deposit.Money,
                 Percent = deposit.Percent,
-                Info = $"Менеджер {manager.Email} разморозил вклад клиента {client.Email}."
+                Info = $"Менеджер {manager.Email} разморозил вклад клиента {client.Email}.",
+                Type = "UnfreezeDeposit"
             };
             _context.UnfreezeDepositActions.Add(UnfreezeDepositAction);
             await _context.SaveChangesAsync();
