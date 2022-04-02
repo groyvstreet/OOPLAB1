@@ -474,7 +474,7 @@ namespace Lab1.Controllers
                 BankNameTo = bankTo.Name,
                 UserId = specialistFrom.Id,
                 UserIdTo = specialistTo.Id,
-                UserEmailFrom = specialistFrom.Email,
+                UserEmail = specialistFrom.Email,
                 UserEmailTo = specialistTo.Email,
                 BalanceIdFrom = balanceFrom.Id,
                 BalanceIdTo = balanceTo.Id,

@@ -29,15 +29,31 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client")]
         public async Task<IActionResult> Create(CreateInstallmentModel model)
         {
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney < 1000)
+            {
+                ModelState.AddModelError("", "Минимальная сумма - 1000");
+                return View(model);
+            }
+            if (model.Months > 120)
+            {
+                ModelState.AddModelError("", "Максимальное количество месяцев - 120 (10 лет)");
+                return View(model);
+            }
             var client = await _context.Clients
                 .Include(c => c.Balances)
                 .Include(c => c.Installments)
                 .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             var balance = client.Balances.FirstOrDefault(b => b.Name == model.BalanceName);
+            if (balance == null)
+            {
+                ModelState.AddModelError("", "Указанный счет не найден");
+                return View(model);
+            }
             var installment = new Installment
             {
-                Money = model.Money,
-                PayMoney = model.Money,
+                Money = modelMoney,
+                PayMoney = modelMoney,
                 Months = model.Months,
                 //CreatingTime = DateTime.Now,
                 //PaymentTime = DateTime.Now.AddMonths(model.Months),

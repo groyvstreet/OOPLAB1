@@ -71,6 +71,7 @@ namespace Lab1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignUp(SignUpUserModel model)
         {
+            ViewBag.Id = model.BankId;
             ViewBag.Roles = _context.Roles;
             if (ModelState.IsValid)
             {

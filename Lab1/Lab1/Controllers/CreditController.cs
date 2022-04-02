@@ -29,16 +29,35 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client")]
         public async Task<IActionResult> Create(CreateCreditModel model)
         {
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney < 1000)
+            {
+                ModelState.AddModelError("", "Минимальная сумма - 1000");
+                ViewBag.Percent = model.Percent;
+                return View(model);
+            }
+            if (model.Months > 120)
+            {
+                ModelState.AddModelError("", "Максимальное количество месяцев - 120 (10 лет)");
+                ViewBag.Percent = model.Percent;
+                return View(model);
+            }
             var client = await _context.Clients
                 .Include(c => c.Balances)
                 .Include(c => c.Credits)
                 .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             var balance = client.Balances.FirstOrDefault(b => b.Name == model.BalanceName);
+            if (balance == null)
+            {
+                ModelState.AddModelError("", "Указанный счет не найден");
+                ViewBag.Percent = model.Percent;
+                return View(model);
+            }
             var credit = new Credit
             {
-                Money = model.Money,
+                Money = modelMoney,
                 Percent = model.Percent + model.Months,
-                MoneyWithPercent = Math.Round(model.Money * (100 + client.Percent + model.Months) / 100,
+                MoneyWithPercent = Math.Round(modelMoney * (100 + client.Percent + model.Months) / 100,
                     2, MidpointRounding.ToPositiveInfinity),
                 Months = model.Months,
                 //CreatingTime = DateTime.Now,
