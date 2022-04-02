@@ -29,14 +29,21 @@ namespace Lab1.Controllers
         public async Task<IActionResult> Open(OpenBalanceModel model)
         {
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
+            if (_context.Balances.FirstOrDefaultAsync(b => b.Name == model.Name &&
+                b.ClientId == user.Id).Result != null)
+            {
+                ModelState.AddModelError("", "Уже открыт счет с таким именем");
+                return View(model);
+            }
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
             var balance = new Balance
             {
                 Name = model.Name,
-                Money = model.Money,
+                Money = modelMoney,
                 ClientId = user.Id
             };
             _context.Balances.Add(balance);
-            switch(user.RoleName)
+            switch (user.RoleName)
             {
                 case "client":
                     var client = await _context.Clients
@@ -50,7 +57,7 @@ namespace Lab1.Controllers
                         UserEmail = client.Email,
                         BalanceId = balance.Id,
                         BalanceName = balance.Name,
-                        Info = $"Клиент {client.Email} открыл счет {balance.Name} с денежной суммой в размере {model.Money}.",
+                        Info = $"Клиент {client.Email} открыл счет {balance.Name} с денежной суммой в размере {modelMoney}.",
                         Type = "OpenBalance"
                     };
                     _context.OpenBalanceActions.Add(openBalanceAction);
@@ -151,6 +158,13 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client, specialist")]
         public async Task<IActionResult> Add(AddBalanceModel model)
         {
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney < 0.01)
+            {
+                ModelState.AddModelError("", "Минимальная сумма - 0.01");
+                ViewBag.BalanceId = model.Id;
+                return View(model);
+            }
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             switch (user.RoleName)
             {
@@ -159,7 +173,7 @@ namespace Lab1.Controllers
                         .Include(c => c.Balances)
                         .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     var cBalance = client.Balances.FirstOrDefault(b => b.Id == model.Id);
-                    cBalance.Money += model.Money;
+                    cBalance.Money += modelMoney;
                     _context.Balances.Update(cBalance);
                     client.Balances.Remove(cBalance);
                     client.Balances.Add(cBalance);
@@ -170,7 +184,7 @@ namespace Lab1.Controllers
                         UserEmail = client.Email,
                         BalanceId = cBalance.Id,
                         BalanceName = cBalance.Name,
-                        Money = model.Money,
+                        Money = modelMoney,
                         Info = $"Клиент {client.Email} пополнил счет {cBalance.Name} на денежную сумму в размере {model.Money}.",
                         Type = "AddBalance"
                     };
@@ -182,7 +196,7 @@ namespace Lab1.Controllers
                         .Include(c => c.Balances)
                         .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
                     var sBalance = specialist.Balances.FirstOrDefault(b => b.Id == model.Id);
-                    sBalance.Money += model.Money;
+                    sBalance.Money += modelMoney;
                     _context.Balances.Update(sBalance);
                     specialist.Balances.Remove(sBalance);
                     specialist.Balances.Add(sBalance);
@@ -205,15 +219,18 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client, specialist")]
         public async Task<IActionResult> Transfer(TransferBalanceModel model)
         {
-            if (model.Money == 0)
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney < 0.01)
             {
                 ModelState.AddModelError("", "Минимальная сумма перевода 0.01");
+                ViewBag.BalanceId = model.IdFrom;
                 return View(model);
             }
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             var balanceTransferAction = new BalanceTransferAction
             {
-                Money = model.Money,
+                Money = modelMoney,
+                Type = "TransferBalance"
             };
             switch (user.RoleName)
             {
@@ -225,6 +242,7 @@ namespace Lab1.Controllers
                     if (cBank == null)
                     {
                         ModelState.AddModelError("", "Указанный банк отсутствует в системе");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     var cBankIdTo = cBank.Id;
@@ -234,6 +252,7 @@ namespace Lab1.Controllers
                     if (clientTo == null)
                     {
                         ModelState.AddModelError("", "Счет не найден");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     var cBalanceFrom = clientFrom.Balances.FirstOrDefault(b => b.Id == model.IdFrom);
@@ -241,11 +260,13 @@ namespace Lab1.Controllers
                     if (cBalanceTo == null)
                     {
                         ModelState.AddModelError("", "Счет не найден");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     if (cBalanceFrom.Id == cBalanceTo.Id)
                     {
                         ModelState.AddModelError("", "Невозможная операция");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     var bankFrom = await _context.Banks.FirstOrDefaultAsync(b => b.Id ==
@@ -259,19 +280,26 @@ namespace Lab1.Controllers
                     balanceTransferAction.BankNameTo = bankTo.Name;
                     balanceTransferAction.UserId = clientFrom.Id;
                     balanceTransferAction.UserIdTo = clientTo.Id;
-                    balanceTransferAction.UserEmailFrom = clientFrom.Email;
+                    balanceTransferAction.UserEmail = clientFrom.Email;
                     balanceTransferAction.UserEmailTo = clientTo.Email;
                     balanceTransferAction.BalanceIdFrom = cBalanceFrom.Id;
                     balanceTransferAction.BalanceIdTo = cBalanceTo.Id;
                     balanceTransferAction.BalanceNameFrom = cBalanceFrom.Name;
                     balanceTransferAction.BalanceNameTo = cBalanceTo.Name;
+                    balanceTransferAction.Info = $"Клиент {clientFrom.Email} перевел сумму {modelMoney} со счета {cBalanceFrom.Name} клиенту {clientTo.Email} на счет {cBalanceTo.Name}";
 
+                    if (cBalanceFrom.Money < modelMoney)
+                    {
+                        ModelState.AddModelError("", "Недостаточно средств на счете");
+                        ViewBag.BalanceId = model.IdFrom;
+                        return View(model);
+                    }
                     clientFrom.Balances.Remove(cBalanceFrom);
-                    cBalanceFrom.Money -= model.Money;
+                    cBalanceFrom.Money -= modelMoney;
                     clientFrom.Balances.Add(cBalanceFrom);
 
                     clientTo.Balances.Remove(cBalanceTo);
-                    cBalanceTo.Money += model.Money;
+                    cBalanceTo.Money += modelMoney;
                     clientTo.Balances.Add(cBalanceTo);
 
                     _context.BalanceTransferActions.Add(balanceTransferAction);
@@ -289,6 +317,7 @@ namespace Lab1.Controllers
                     if (sBank == null)
                     {
                         ModelState.AddModelError("", "Указанный банк отсутствует в системе");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     var sBankIdTo = sBank.Id;
@@ -299,6 +328,7 @@ namespace Lab1.Controllers
                     if (specialistTo == null)
                     {
                         ModelState.AddModelError("", "Счет не найден");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     var sBalanceFrom = specialistFrom.Balances.FirstOrDefault(b => b.Id == model.IdFrom);
@@ -306,21 +336,28 @@ namespace Lab1.Controllers
                     if (sBalanceTo == null)
                     {
                         ModelState.AddModelError("", "Счет не найден");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
                     if (sBalanceFrom.Id == sBalanceTo.Id)
                     {
                         ModelState.AddModelError("", "Невозможная операция");
+                        ViewBag.BalanceId = model.IdFrom;
                         return View(model);
                     }
-
+                    if (sBalanceFrom.Money < modelMoney)
+                    {
+                        ModelState.AddModelError("", "Недостаточно средств на счете");
+                        ViewBag.BalanceId = model.IdFrom;
+                        return View(model);
+                    }
                     specialistFrom.Balances.Remove(sBalanceFrom);
-                    sBalanceFrom.Money -= model.Money;
+                    sBalanceFrom.Money -= modelMoney;
                     specialistFrom.Balances.Add(sBalanceFrom);
 
                     var balanceTransferApproving = new BalanceTransferApproving
                     {
-                        Money = model.Money,
+                        Money = modelMoney,
                         BalanceIdFrom = sBalanceFrom.Id,
                         BalanceIdTo = sBalanceTo.Id
                     };

@@ -14,20 +14,21 @@
     <div>
         <div>
             <label asp-for="Money">Введите денежную сумму</label><br />
-            <input type="number" asp-for="Money" />
+            <input type="text" asp-for="Money" />
             <span asp-validation-for="Money" />
         </div>
         <div>
             <label asp-for="Percent">Введите процент</label><br />
-            <input asp-for="Percent" />
+            <input type="text" asp-for="Percent" />
             <span asp-validation-for="Percent" />
         </div>
         <div>
-            <input asp-for="ClosedTime" asp-format="{0:yyyy-MM-ddTHH:mm}" /><br />
+            <label asp-for="ClosedTime">Введите время закрытия</label><br />
+            <input asp-for="ClosedTime" asp-format="{0:yyyy-MM-ddTHH:mm}" />
         </div>
         <div>
             <label asp-for="BalanceName">Введите наименование счета</label><br />
-            <input asp-for="BalanceName" />
+            <input type="text" asp-for="BalanceName" />
         </div>
         <div>
             <input type="submit" value="Создать вклад" />

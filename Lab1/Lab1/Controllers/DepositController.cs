@@ -34,9 +34,20 @@ namespace Lab1.Controllers
                     .Include(c => c.Deposits)
                     .Include(c => c.Balances)
                     .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
+                double modelMoney = double.Parse(model.Money.Replace(".", ","));
+                if (modelMoney < 1000)
+                {
+                    ModelState.AddModelError("", "Минимальная сумма - 1000");
+                    return View(model);
+                }
+                if(model.ClosedTime < DateTime.Now)
+                {
+                    ModelState.AddModelError("", "Некорректное время закрытия");
+                    return View(model);
+                }
                 Deposit deposit = new Deposit
                 {
-                    Money = model.Money,
+                    Money = modelMoney,
                     Percent = model.Percent,
                     ClientId = client.Id,
                     ClosedTime = model.ClosedTime
@@ -44,12 +55,12 @@ namespace Lab1.Controllers
                 var balance = client.Balances.FirstOrDefault(b => b.Name == model.BalanceName);
                 if (balance != null)
                 {
-                    if(balance.Money < model.Money)
+                    if(balance.Money < modelMoney)
                     {
                         return View();
                     }
                     client.Balances.Remove(balance);
-                    balance.Money -= model.Money;
+                    balance.Money -= modelMoney;
                     client.Balances.Add(balance);
                     _context.Balances.Update(balance);
                 }
@@ -85,13 +96,20 @@ namespace Lab1.Controllers
         [Authorize(Roles = "client")]
         public async Task<IActionResult> Add(AddDepositModel model)
         {
+            double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney < 0.01)
+            {
+                ModelState.AddModelError("", "Минимальная сумма - 0.01");
+                ViewBag.DepositId = model.Id;
+                return View(model);
+            }
             var client = await _context.Clients.Include(c => c.Deposits)
                 .FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             var deposit = client.Deposits.FirstOrDefault(d => d.Id == model.Id);
             if (deposit.ClosedTime >= DateTime.Now)
             {
                 client.Deposits.Remove(deposit);
-                deposit.Money += model.Money;
+                deposit.Money += modelMoney;
                 client.Deposits.Add(deposit);
                 _context.Deposits.Update(deposit);
                 _context.Clients.Update(client);
@@ -104,8 +122,8 @@ namespace Lab1.Controllers
                     Percent = deposit.Percent,
                     OpenedTime = deposit.OpenedTime,
                     ClosedTime = deposit.ClosedTime,
-                    AddedMoney = model.Money,
-                    Info = $"Клиент {client.Email} пополнил вклад на сумму {deposit.Money}.",
+                    AddedMoney = modelMoney,
+                    Info = $"Клиент {client.Email} пополнил вклад на сумму {modelMoney}.",
                     Type = "AddDeposit"
                 };
                 _context.AddDepositActions.Add(addDepositAction);
