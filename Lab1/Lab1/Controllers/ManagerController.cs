@@ -141,6 +141,10 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(c => c.Id == credit.ClientId);
             var balance = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
                 creditApproving.BalanceId);
+            if (balance == null)
+            {
+                return RedirectToAction("CreditApprovings", "Manager");
+            }
             client.Credits.Remove(credit);
             client.Balances.Remove(balance);
             credit.Approved = true;
@@ -230,6 +234,10 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(c => c.Id == installment.ClientId);
             var balance = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
                 installmentApproving.BalanceId);
+            if (balance == null)
+            {
+                return RedirectToAction("InstallmentApprovings", "Manager");
+            }
             client.Installments.Remove(installment);
             client.Balances.Remove(balance);
             installment.Approved = true;
@@ -479,7 +487,9 @@ namespace Lab1.Controllers
                 BalanceIdFrom = balanceFrom.Id,
                 BalanceIdTo = balanceTo.Id,
                 BalanceNameFrom = balanceFrom.Name,
-                BalanceNameTo = balanceTo.Name
+                BalanceNameTo = balanceTo.Name,
+                Info = $"Специалист {specialistFrom.Email} перевел со счета {balanceFrom.Name} сумму в размере {approving.Money} специалисту {specialistTo.Email} на счет {balanceTo.Name}",
+                Type = "TransferBalance"
             };
 
             _context.BalanceTransferActions.Add(balanceTransferAction);
@@ -547,7 +557,7 @@ namespace Lab1.Controllers
         {
             var action = await _context.BalanceTransferActions
                 .FirstOrDefaultAsync(a => a.Id == actionId);
-            if (action.BalanceIdFrom == null || action.BalanceIdTo == null || action.Canceled == true)
+            if (action.Canceled == true)
             {
                 return RedirectToAction("SpecialistBalanceTransferActions", "Manager", new { specialistId = action.UserId });
             }
@@ -561,6 +571,10 @@ namespace Lab1.Controllers
                 action.BalanceIdFrom);
             var balanceTo = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
                 action.BalanceIdTo);
+            if (balanceFrom == null || balanceTo == null)
+            {
+                return RedirectToAction("SpecialistBalanceTransferActions", "Manager", new { specialistId = action.UserId });
+            }
             if (balanceTo.Money < action.Money)
             {
                 return RedirectToAction("SpecialistBalanceTransferActions", "Manager", new { specialistId = action.UserId });

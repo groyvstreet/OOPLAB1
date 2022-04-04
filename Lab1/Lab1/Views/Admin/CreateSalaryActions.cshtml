@@ -11,9 +11,13 @@
 {
     <table cellpadding="10" border="1">
         <caption>Подачи документов</caption>
+        <tr>
+            <th>Время</th>
+        </tr>
         @foreach (var action in Model.Actions)
         {
             <tr>
+                <td>@action.Time</td>
                 <td>Подача документов на заработный проект</td>
                 @if (!action.Canceled)
                 {

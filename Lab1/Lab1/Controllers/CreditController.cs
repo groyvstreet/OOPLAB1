@@ -36,6 +36,12 @@ namespace Lab1.Controllers
                 ViewBag.Percent = model.Percent;
                 return View(model);
             }
+            if (modelMoney > 1000000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма взятия кредита - 1 000 000 000");
+                ViewBag.Percent = model.Percent;
+                return View(model);
+            }
             if (model.Months > 120)
             {
                 ModelState.AddModelError("", "Максимальное количество месяцев - 120 (10 лет)");
@@ -56,7 +62,7 @@ namespace Lab1.Controllers
             var credit = new Credit
             {
                 Money = modelMoney,
-                Percent = model.Percent + model.Months,
+                Percent = client.Percent + model.Percent + model.Months,
                 MoneyWithPercent = Math.Round(modelMoney * (100 + client.Percent + model.Months) / 100,
                     2, MidpointRounding.ToPositiveInfinity),
                 Months = model.Months,
@@ -151,13 +157,14 @@ namespace Lab1.Controllers
                 Months = credit.Months,
                 PayedMonths = credit.PayedMonths,
                 Fines = credit.Fines,
+                Percent = credit.Percent,
                 CreatingTime = credit.CreatingTime,
                 PaymentTime = credit.PaymentTime,
                 BalanceId = balance.Id,
                 BalanceName = balance.Name,
                 SinglePaymentMoney = credit.MoneyWithPercent,
-                Info = $"Клиент {client.Email} выплатил сумму рассрочки в размере {credit.MoneyWithPercent}.",
-                Type = "PayInstallment"
+                Info = $"Клиент {client.Email} выплатил сумму кредита в размере {credit.MoneyWithPercent}.",
+                Type = "PayCredit"
             };
             _context.PayCreditActions.Add(payCreditAction);
             await _context.SaveChangesAsync();
@@ -226,6 +233,7 @@ namespace Lab1.Controllers
                 MoneyWithPercent = credit.MoneyWithPercent,
                 Months = credit.Months,
                 PayedMonths = credit.PayedMonths,
+                Percent = credit.Percent,
                 Fines = credit.Fines,
                 CreatingTime = credit.CreatingTime,
                 PaymentTime = credit.PaymentTime,

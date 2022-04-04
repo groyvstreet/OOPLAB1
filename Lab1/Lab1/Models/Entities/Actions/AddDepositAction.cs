@@ -3,6 +3,6 @@
     public class AddDepositAction : DepositAction
     {
         public double AddedMoney { get; set; }
-        public bool Closed { get; set; }
+        //public bool Closed { get; set; }
     }
 }

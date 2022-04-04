@@ -12,6 +12,7 @@
     <table cellpadding="10" border="1">
         <caption>Переводы вкладов</caption>
         <tr>
+            <th>Время</th>
             <th>Вклад-отправитель</th>
             <th>Вклад-получатель</th>
             <th>Сумма перевода</th>
@@ -19,6 +20,7 @@
         @foreach (var action in Model.Actions)
         {
             <tr>
+                <td>@action.Time</td>
                 <td>
                     <div>Сумма вклада: @action.Money</div>
                     <div>Процент: @action.Percent</div>

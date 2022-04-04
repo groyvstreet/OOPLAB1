@@ -36,6 +36,11 @@ namespace Lab1.Controllers
                 return View(model);
             }
             double modelMoney = double.Parse(model.Money.Replace(".", ","));
+            if (modelMoney > 1000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма пополнения за раз - 1000000");
+                return View(model);
+            }
             var balance = new Balance
             {
                 Name = model.Name,
@@ -89,7 +94,7 @@ namespace Lab1.Controllers
                     _context.Balances.Remove(cBalance);
                     client.Balances.Remove(cBalance);
                     _context.Clients.Update(client);
-                    var cBalanceTransferActions = _context.BalanceTransferActions
+                    /*var cBalanceTransferActions = _context.BalanceTransferActions
                         .Where(a => a.BalanceIdFrom == cBalance.Id || a.BalanceIdTo ==
                             cBalance.Id).ToList();
                     foreach (var balanceTransferAction in cBalanceTransferActions)
@@ -103,7 +108,7 @@ namespace Lab1.Controllers
                             balanceTransferAction.BalanceIdTo = null;
                         }
                         _context.BalanceTransferActions.Update(balanceTransferAction);
-                    }
+                    }*/
                     var closeBalanceAction = new CloseBalanceAction
                     {
                         UserId = client.Id,
@@ -165,6 +170,12 @@ namespace Lab1.Controllers
                 ViewBag.BalanceId = model.Id;
                 return View(model);
             }
+            if (modelMoney > 1000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма пополнения за раз - 1000000");
+                ViewBag.BalanceId = model.Id;
+                return View(model);
+            }
             var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
             switch (user.RoleName)
             {
@@ -223,6 +234,12 @@ namespace Lab1.Controllers
             if (modelMoney < 0.01)
             {
                 ModelState.AddModelError("", "Минимальная сумма перевода 0.01");
+                ViewBag.BalanceId = model.IdFrom;
+                return View(model);
+            }
+            if (modelMoney > 1000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма перевода за раз - 1000000");
                 ViewBag.BalanceId = model.IdFrom;
                 return View(model);
             }
