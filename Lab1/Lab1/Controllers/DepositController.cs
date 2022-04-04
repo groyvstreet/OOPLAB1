@@ -177,12 +177,6 @@ namespace Lab1.Controllers
             var depositTo = client.Deposits.FirstOrDefault(d => d.Id == model.IdTo);
             if (depositTo.ClosedTime >= DateTime.Now)
             {
-                depositTo.Money += Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2);
-                _context.Deposits.Remove(depositFrom);
-                _context.Deposits.Update(depositTo);
-                client.Deposits.Remove(depositFrom);
-                client.Deposits.Add(depositTo);
-                _context.Clients.Update(client);
                 var transferDepositAction = new TransferDepositAction
                 {
                     UserId = client.Id,
@@ -197,11 +191,17 @@ namespace Lab1.Controllers
                     DepositToPercent = depositTo.Percent,
                     DepositToOpenedTime = depositTo.OpenedTime,
                     DepositToClosedTime = depositTo.ClosedTime,
-                    TransferMoney = Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2),
+                    TransferMoney = Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2, MidpointRounding.ToPositiveInfinity),
                     Info = $"Клиент {client.Email} перевел вклад на сумму {depositFrom.Money} с процентом {depositFrom.Percent} ко вкладу на сумму {depositTo.Money} с процентом {depositTo.Percent}.",
                     Type = "TransferDeposit"
                 };
                 _context.TransferDepositActions.Add(transferDepositAction);
+                depositTo.Money += Math.Round((depositFrom.Percent + 100) * depositFrom.Money / 100, 2, MidpointRounding.ToPositiveInfinity);
+                _context.Deposits.Remove(depositFrom);
+                _context.Deposits.Update(depositTo);
+                client.Deposits.Remove(depositFrom);
+                client.Deposits.Add(depositTo);
+                _context.Clients.Update(client);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Profile", "Client");
             }
@@ -228,12 +228,12 @@ namespace Lab1.Controllers
             double money;
             if (DateTime.Now >= deposit.ClosedTime)
             {
-                money = Math.Round((deposit.Percent + 100) * deposit.Money / 100, 2);
+                money = Math.Round((deposit.Percent + 100) * deposit.Money / 100, 2, MidpointRounding.ToPositiveInfinity);
             }
             else
             {
                 money = Math.Round(((DateTime.Now - deposit.OpenedTime) / (deposit.ClosedTime - deposit.OpenedTime)
-                    * (deposit.Percent) + 100) * deposit.Money / 100, 2);
+                    * (deposit.Percent) + 100) * deposit.Money / 100, 2, MidpointRounding.ToPositiveInfinity);
             }
             ViewBag.DepositId = depositId;
             ViewBag.Money = money;
@@ -273,12 +273,12 @@ namespace Lab1.Controllers
             };
             if (DateTime.Now >= deposit.ClosedTime)
             {
-                deposit.Money = Math.Round((deposit.Percent + 100) * deposit.Money / 100, 2);
+                deposit.Money = Math.Round((deposit.Percent + 100) * deposit.Money / 100, 2, MidpointRounding.ToPositiveInfinity);
             }
             else
             {
                 deposit.Money = Math.Round(((DateTime.Now - deposit.OpenedTime) / (deposit.ClosedTime - deposit.OpenedTime)
-                    * (deposit.Percent) + 100) * deposit.Money / 100, 2);
+                    * (deposit.Percent) + 100) * deposit.Money / 100, 2, MidpointRounding.ToPositiveInfinity);
             }
             getDepositAction.MoneyWithPercent = deposit.Money;
             balance.Money += deposit.Money;

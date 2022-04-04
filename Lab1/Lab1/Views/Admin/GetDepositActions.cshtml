@@ -12,18 +12,22 @@
     <table cellpadding="10" border="1">
         <caption>Снятия денег с вкладов</caption>
         <tr>
+            <th>Время</th>
             <th>Клиент</th>
-            <th>Снятая сумма</th>
+            <th>Сумма</th>
             <th>Процент</th>
+            <th>Снятая сумма</th>
             <th>Время открытия вклада</th>
             <th>Время закрытия вклада</th>
         </tr>
         @foreach (var action in Model.Actions)
         {
             <tr>
+                <td>@action.Time</td>
                 <td>@action.UserEmail</td>
                 <td>@action.Money</td>
                 <td>@action.Percent</td>
+                <td>@action.MoneyWithPercent</td>
                 <td>@action.OpenedTime</td>
                 <td>@action.ClosedTime</td>
                 @if (!action.Canceled)
@@ -37,7 +41,7 @@
                 }
                 else
                 {
-                    <td>Отменено</td>
+                    <td>Отменено @action.CancelTime</td>
                 }
             </tr>
         }

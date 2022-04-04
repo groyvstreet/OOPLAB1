@@ -94,21 +94,6 @@ namespace Lab1.Controllers
                     _context.Balances.Remove(cBalance);
                     client.Balances.Remove(cBalance);
                     _context.Clients.Update(client);
-                    /*var cBalanceTransferActions = _context.BalanceTransferActions
-                        .Where(a => a.BalanceIdFrom == cBalance.Id || a.BalanceIdTo ==
-                            cBalance.Id).ToList();
-                    foreach (var balanceTransferAction in cBalanceTransferActions)
-                    {
-                        if (balanceTransferAction.BalanceIdFrom == cBalance.Id)
-                        {
-                            balanceTransferAction.BalanceIdFrom = null;
-                        }
-                        else
-                        {
-                            balanceTransferAction.BalanceIdTo = null;
-                        }
-                        _context.BalanceTransferActions.Update(balanceTransferAction);
-                    }*/
                     var closeBalanceAction = new CloseBalanceAction
                     {
                         UserId = client.Id,
@@ -247,7 +232,6 @@ namespace Lab1.Controllers
             var balanceTransferAction = new BalanceTransferAction
             {
                 Money = modelMoney,
-                Type = "TransferBalance"
             };
             switch (user.RoleName)
             {
@@ -304,6 +288,7 @@ namespace Lab1.Controllers
                     balanceTransferAction.BalanceNameFrom = cBalanceFrom.Name;
                     balanceTransferAction.BalanceNameTo = cBalanceTo.Name;
                     balanceTransferAction.Info = $"Клиент {clientFrom.Email} перевел сумму {modelMoney} со счета {cBalanceFrom.Name} клиенту {clientTo.Email} на счет {cBalanceTo.Name}";
+                    balanceTransferAction.Type = "ClientTransferBalance";
 
                     if (cBalanceFrom.Money < modelMoney)
                     {

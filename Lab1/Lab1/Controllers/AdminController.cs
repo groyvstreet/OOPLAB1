@@ -112,6 +112,7 @@ namespace Lab1.Controllers
             deposit.Blocked = false;
             client.Deposits.Add(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.Deposits.Update(deposit);
             _context.Clients.Update(client);
             _context.BlockDepositActions.Update(action);
@@ -148,6 +149,7 @@ namespace Lab1.Controllers
             deposit.Freezed = false;
             client.Deposits.Add(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.Deposits.Update(deposit);
             _context.Clients.Update(client);
             _context.FreezeDepositActions.Update(action);
@@ -184,6 +186,7 @@ namespace Lab1.Controllers
             deposit.Blocked = true;
             client.Deposits.Add(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.Deposits.Update(deposit);
             _context.Clients.Update(client);
             _context.UnblockDepositActions.Update(action);
@@ -220,6 +223,7 @@ namespace Lab1.Controllers
             deposit.Freezed = true;
             client.Deposits.Add(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.Deposits.Update(deposit);
             _context.Clients.Update(client);
             _context.UnfreezeDepositActions.Update(action);
@@ -255,6 +259,7 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(c => c.Id == deposit.ClientId);
             client.Deposits.Remove(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.Deposits.Remove(deposit);
             if(action.BalanceId != null)
             {
@@ -302,6 +307,7 @@ namespace Lab1.Controllers
             };
             client.Deposits.Add(deposit);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             var balance = client.Balances.FirstOrDefault(b => b.Id == action.BalanceId);
             if(balance == null || balance.Money < action.MoneyWithPercent)
             {
@@ -344,6 +350,7 @@ namespace Lab1.Controllers
                 return RedirectToAction("AddDepositActions", "Admin", new { clientId = action.UserId });
             }
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             client.Deposits.Remove(deposit);
             deposit.Money -= action.AddedMoney;
             client.Deposits.Add(deposit);
@@ -388,6 +395,7 @@ namespace Lab1.Controllers
                 ClientId = action.UserId
             };
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             client.Deposits.Remove(depositTo);
             depositTo.Money -= action.TransferMoney;
             client.Deposits.Add(depositTo);
@@ -418,12 +426,13 @@ namespace Lab1.Controllers
             var client = await _context.Clients
                 .Include(c => c.Salary)
                 .FirstOrDefaultAsync(c => c.Id == action.UserId);
-            if(client.Salary.ApprovedBySpecialist || client.Salary.ApprovedByOperator)
+            if(client.Salary == null || client.Salary.ApprovedBySpecialist || client.Salary.ApprovedByOperator)
             {
                 return RedirectToAction("CreateSalaryActions", "Admin", new { clientId = action.UserId });
             }
             client.Salary = null;
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             var salaryApproving = await _context.SalaryApprovings.FirstOrDefaultAsync(a =>
                 a.ClientId == client.Id);
             _context.SalaryApprovings.Remove(salaryApproving);
@@ -453,6 +462,7 @@ namespace Lab1.Controllers
                 .Include(c => c.Balances)
                 .FirstOrDefaultAsync(c => c.Id == action.UserId);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             var balance = client.Balances.FirstOrDefault(b => b.Id == action.BalanceId);
             if (balance == null || balance.Money < action.Money)
             {
@@ -483,13 +493,13 @@ namespace Lab1.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> CancelSalaryApprovingByOperatorAction(string? actionId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
             var action = await _context.SalaryApprovingByOperatorActions
                 .FirstOrDefaultAsync(a => a.Id == actionId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == action.UserId);
             var client = await _context.Clients
                 .Include(c => c.Salary)
                 .FirstOrDefaultAsync(c => c.Id == action.ClientId);
-            if (action.Canceled)
+            if (action.Canceled || client.Salary == null)
             {
                 if (user.RoleName == "operator")
                 {
@@ -508,6 +518,7 @@ namespace Lab1.Controllers
             };
             _context.SalaryApprovings.Add(salaryApproving);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.SalaryApprovingByOperatorActions.Update(action);
             await _context.SaveChangesAsync();
             if (user.RoleName == "operator")
@@ -535,13 +546,13 @@ namespace Lab1.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> CancelSalaryRejectingByOperatorAction(string? actionId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
             var action = await _context.SalaryRejectingByOperatorActions
                 .FirstOrDefaultAsync(a => a.Id == actionId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == action.UserId);
             var client = await _context.Clients
                 .Include(c => c.Salary)
                 .FirstOrDefaultAsync(c => c.Id == action.ClientId);
-            if (action.Canceled)
+            if (action.Canceled || client.Salary != null)
             {
                 if (user.RoleName == "operator")
                 {
@@ -567,6 +578,7 @@ namespace Lab1.Controllers
             };
             _context.SalaryApprovings.Add(salaryApproving);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.SalaryRejectingByOperatorActions.Update(action);
             await _context.SaveChangesAsync();
             if (user.RoleName == "operator")
@@ -636,6 +648,7 @@ namespace Lab1.Controllers
             _context.Balances.Remove(balance);
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.OpenBalanceActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("OpenBalanceActions", "Admin", new { clientId = action.UserId });
@@ -682,6 +695,7 @@ namespace Lab1.Controllers
             _context.Balances.Add(balance);
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.CloseBalanceActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("CloseBalanceActions", "Admin", new { clientId = action.UserId });
@@ -722,6 +736,7 @@ namespace Lab1.Controllers
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.AddBalanceActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("AddBalanceActions", "Admin", new { clientId = action.UserId });
@@ -782,6 +797,7 @@ namespace Lab1.Controllers
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.CreateInstallmentActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("CreateInstallmentActions", "Admin", new { clientId = action.UserId });
@@ -849,6 +865,7 @@ namespace Lab1.Controllers
             }
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.PayInstallmentActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("PayInstallmentActions", "Admin", new { clientId = action.UserId });
@@ -893,6 +910,7 @@ namespace Lab1.Controllers
             _context.Balances.Update(balance);
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.CreateCreditActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("CreateCreditActions", "Admin", new { clientId = action.UserId });
@@ -962,6 +980,7 @@ namespace Lab1.Controllers
             }
             _context.Clients.Update(client);
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.PayCreditActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("PayCreditActions", "Admin", new { clientId = action.UserId });
@@ -998,8 +1017,10 @@ namespace Lab1.Controllers
                     return RedirectToAction("CancelAddBalanceAction", "Admin", new { actionId = actionId });
                 case "AddDeposit":
                     return RedirectToAction("CancelAddDepositAction", "Admin", new { actionId = actionId });
-                case "TransferBalance":
+                case "ClientTransferBalance":
                     return RedirectToAction("CancelClientBalanceTransfer", "Operator", new { actionId = actionId });
+                case "SpecialistTransferBalance":
+                    return RedirectToAction("CancelSpecialistBalanceTransferAction", "Manager", new { actionId = actionId });
                 case "BlockDeposit":
                     return RedirectToAction("CancelBlockDepositAction", "Admin", new { actionId = actionId });
                 case "CloseBalance":
@@ -1025,13 +1046,13 @@ namespace Lab1.Controllers
                 case "PayInstallment":
                     return RedirectToAction("CancelPayInstallmentAction", "Admin", new { actionId = actionId });
                 case "SalaryApprovingByOperator":
-                    return RedirectToAction("CancelSalaryApprovingByOperator", "Admin", new { actionId = actionId });
+                    return RedirectToAction("CancelSalaryApprovingByOperatorAction", "Admin", new { actionId = actionId });
                 case "SalaryApprovingBySpecialist":
-                    return RedirectToAction("CancelSalaryApprovingBySpecialist", "Admin", new { actionId = actionId });
+                    return RedirectToAction("CancelSalaryApprovingBySpecialistAction", "Manager", new { actionId = actionId });
                 case "SalaryRejectingBySpecialist":
-                    return RedirectToAction("CancelSalaryRejectingBySpecialist", "Admin", new { actionId = actionId });
+                    return RedirectToAction("CancelSalaryRejectingBySpecialistAction", "Manager", new { actionId = actionId });
                 case "SalaryRejectingByOperator":
-                    return RedirectToAction("CancelSalaryRejectingByOperator", "Admin", new { actionId = actionId });
+                    return RedirectToAction("CancelSalaryRejectingByOperatorAction", "Admin", new { actionId = actionId });
                 case "TransferDeposit":
                     return RedirectToAction("CancelTransferDepositAction", "Admin", new { actionId = actionId });
                 case "UnblockDeposit":

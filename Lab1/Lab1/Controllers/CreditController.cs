@@ -66,8 +66,6 @@ namespace Lab1.Controllers
                 MoneyWithPercent = Math.Round(modelMoney * (100 + client.Percent + model.Months) / 100,
                     2, MidpointRounding.ToPositiveInfinity),
                 Months = model.Months,
-                //CreatingTime = DateTime.Now,
-                //PaymentTime = DateTime.Now.AddMonths(model.Months),
                 ClientId = client.Id
             };
             var creditApproving = new CreditApproving
@@ -75,9 +73,6 @@ namespace Lab1.Controllers
                 CreditId = credit.Id,
                 BalanceId = balance.Id
             };
-           /* client.Balances.Remove(balance);
-            balance.Money += credit.Money;
-            client.Balances.Add(balance);*/
            _context.CreditApprovings.Add(creditApproving);
             client.Credits.Add(credit);
             _context.Credits.Add(credit);
@@ -142,8 +137,7 @@ namespace Lab1.Controllers
             client.Credits.Remove(credit);
             client.Balances.Remove(balance);
             balance.Money -= credit.MoneyWithPercent;
-            balance.Money = Math.Round(balance.Money, 2,
-                MidpointRounding.ToPositiveInfinity);
+            balance.Money = Math.Round(balance.Money, 2, MidpointRounding.ToPositiveInfinity);
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             _context.Clients.Update(client);

@@ -59,8 +59,6 @@ namespace Lab1.Controllers
                 Money = modelMoney,
                 PayMoney = modelMoney,
                 Months = model.Months,
-                //CreatingTime = DateTime.Now,
-                //PaymentTime = DateTime.Now.AddMonths(model.Months),
                 ClientId = client.Id
             };
             var installmentApproving = new InstallmentApproving
@@ -68,13 +66,9 @@ namespace Lab1.Controllers
                 InstallmentId = installment.Id,
                 BalanceId = balance.Id
             };
-            /*client.Balances.Remove(balance);
-            balance.Money += installment.Money;
-            client.Balances.Add(balance);*/
             _context.InstallmentApprovings.Add(installmentApproving);
             client.Installments.Add(installment);
             _context.Installments.Add(installment);
-            //_context.Balances.Update(balance);
             _context.Clients.Update(client);
             await _context.SaveChangesAsync();
             return RedirectToAction("Profile", "Client");
@@ -200,8 +194,7 @@ namespace Lab1.Controllers
             _context.PayInstallmentActions.Add(payInstallmentAction);
             client.Balances.Remove(balance);
             balance.Money -= payMoney;
-            balance.Money = Math.Round(balance.Money, 2,
-                MidpointRounding.ToPositiveInfinity);
+            balance.Money = Math.Round(balance.Money, 2, MidpointRounding.ToPositiveInfinity);
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             client.Installments.Remove(installment);
@@ -212,8 +205,7 @@ namespace Lab1.Controllers
             }
             else
             {
-                installment.PayMoney = Math.Round(installment.PayMoney, 2,
-                    MidpointRounding.ToPositiveInfinity);
+                installment.PayMoney = Math.Round(installment.PayMoney, 2, MidpointRounding.ToPositiveInfinity);
                 installment.PayedMonths += 1;
                 client.Installments.Add(installment);
                 _context.Installments.Update(installment);

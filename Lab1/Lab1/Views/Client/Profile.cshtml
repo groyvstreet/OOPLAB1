@@ -51,17 +51,24 @@ else
     {
         if (Model.Salary.ApprovedByOperator)
         {
-            <form asp-action="GetSalary" asp-controller="Client" asp-anti-forgery="true">
-                <div class="input-group mb-3">
-                    <select class="custom-select" id="inputGroupSelect01" name="balanceId">
-                        @foreach (var balance in Model.Balances)
-                        {
-                            <option value="@balance.Id">@balance.Name</option>
-                        }
-                    </select>
-                </div>
-                <input type="submit" value="Получить заработную плату">
-            </form>
+            if (Model.Balances.Any())
+            {
+                <form asp-action="GetSalary" asp-controller="Client" asp-anti-forgery="true">
+                    <div class="input-group mb-3">
+                        <select class="custom-select" id="inputGroupSelect01" name="balanceId">
+                            @foreach (var balance in Model.Balances)
+                            {
+                                <option value="@balance.Id">@balance.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <input type="submit" value="Получить заработную плату">
+                </form>
+            }
+            else
+            {
+                <p>Для получения заработной платы нужно завести счет</p>
+            }
         }
     }
 
