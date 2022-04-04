@@ -20,7 +20,6 @@ namespace Lab1.Controllers
         [Authorize(Roles = "manager")]
         public async Task<IActionResult> Profile()
         {
-            //var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var manager = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var bank = await _context.Banks.FirstOrDefaultAsync(b => b.Id == manager.BankId);
             var model = new ManagerProfileModel
@@ -36,31 +35,8 @@ namespace Lab1.Controllers
         }
 
         [Authorize(Roles = "manager")]
-        public async Task<IActionResult> SignUp()
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
-            var manager = new Manager
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Password = user.Password,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Patronymic = user.Patronymic,
-                PhoneNumber = user.PhoneNumber,
-                RoleName = user.RoleName,
-                BankId = user.BankId
-            };
-            //_context.Users.Remove(user);
-            //_context.Managers.Add(manager);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Profile", "Manager");
-        }
-
-        [Authorize(Roles = "manager")]
         public async Task<IActionResult> SignUpApprovings()
         {
-            //var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var manager = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var signUpApprovings = _context.SignUpApprovings;
             var clients = new List<Client>();
@@ -108,7 +84,6 @@ namespace Lab1.Controllers
         [Authorize(Roles = "manager")]
         public async Task<IActionResult> CreditApprovings()
         {
-            //var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var manager = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var creditApprovings = _context.CreditApprovings;
             var credits = new List<Credit>();
@@ -199,7 +174,6 @@ namespace Lab1.Controllers
         [Authorize(Roles = "manager")]
         public async Task<IActionResult> InstallmentApprovings()
         {
-            //var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var manager = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var installmentApprovings = _context.InstallmentApprovings;
             var installments = new List<Installment>();
@@ -291,7 +265,6 @@ namespace Lab1.Controllers
         [Authorize(Roles = "manager")]
         public async Task<IActionResult> Deposits()
         {
-            //var manager = await _context.Managers.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var manager = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var clients = _context.Clients
                 .Include(c => c.Deposits)
@@ -428,6 +401,10 @@ namespace Lab1.Controllers
             {
                 var balanceFrom = await _context.Balances.FirstOrDefaultAsync(b => b.Id == approving.BalanceIdFrom);
                 var balanceTo = await _context.Balances.FirstOrDefaultAsync(b => b.Id == approving.BalanceIdTo);
+                if(balanceFrom == null || balanceTo == null)
+                {
+                    continue;
+                }
                 var specialistFrom = await _context.Specialists.FirstOrDefaultAsync(s =>
                     s.Id == balanceFrom.ClientId);
                 var specialistTo = await _context.Specialists.FirstOrDefaultAsync(s =>
@@ -465,9 +442,6 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(s => s.Id == balanceTo.ClientId);
             var bankFrom = await _context.Banks.FirstOrDefaultAsync(b => b.Id == specialistFrom.BankId);
             var bankTo = await _context.Banks.FirstOrDefaultAsync(b => b.Id == specialistTo.BankId);
-            /*specialistFrom.Balances.Remove(balanceFrom);
-            balanceFrom.Money -= approving.Money;
-            specialistFrom.Balances.Add(balanceFrom);*/
 
             specialistTo.Balances.Remove(balanceTo);
             balanceTo.Money += approving.Money;
@@ -489,7 +463,7 @@ namespace Lab1.Controllers
                 BalanceNameFrom = balanceFrom.Name,
                 BalanceNameTo = balanceTo.Name,
                 Info = $"Специалист {specialistFrom.Email} перевел со счета {balanceFrom.Name} сумму в размере {approving.Money} специалисту {specialistTo.Email} на счет {balanceTo.Name}",
-                Type = "TransferBalance"
+                Type = "SpecialistTransferBalance"
             };
 
             _context.BalanceTransferActions.Add(balanceTransferAction);
@@ -589,6 +563,7 @@ namespace Lab1.Controllers
             specialistTo.Balances.Add(balanceTo);
 
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.BalanceTransferActions.Update(action);
             _context.Balances.Update(balanceFrom);
             _context.Balances.Update(balanceTo);
@@ -620,18 +595,14 @@ namespace Lab1.Controllers
             var client = await _context.Clients
                 .Include(c => c.Salary)
                 .FirstOrDefaultAsync(c => c.Id == action.ClientId);
-            if (client.Salary.ApprovedByOperator || action.Canceled)
+            if (client.Salary == null || client.Salary.ApprovedByOperator || action.Canceled)
             {
                 return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.UserId });
             }
             client.Salary.ApprovedBySpecialist = false;
             _context.Clients.Update(client);
-            /*var salaryApproving = new SalaryApproving
-            {
-                ClientId = action.ClientId
-            };
-            _context.SalaryApprovings.Add(salaryApproving);*/
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.SalaryApprovingBySpecialistActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.UserId });
@@ -659,7 +630,7 @@ namespace Lab1.Controllers
             var client = await _context.Clients
                 .Include(c => c.Salary)
                 .FirstOrDefaultAsync(c => c.Id == action.ClientId);
-            if (action.Canceled)
+            if (action.Canceled || client.Salary != null)
             {
                 return RedirectToAction("SalaryApprovingBySpecialistActions", "Manager", new { specialistId = action.UserId });
             }
@@ -676,12 +647,8 @@ namespace Lab1.Controllers
                 ClientId = client.Id
             };
             _context.SalaryApprovings.Add(salaryApproving);
-            /*var salaryApproving = new SalaryApproving
-            {
-                ClientId = action.ClientId
-            };
-            _context.SalaryApprovings.Add(salaryApproving);*/
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.SalaryRejectingBySpecialistActions.Update(action);
             await _context.SaveChangesAsync();
             return RedirectToAction("SalaryRejectingBySpecialistActions", "Manager", new { specialistId = action.UserId });

@@ -1,16 +1,14 @@
 ﻿using Lab1.Models.Entities;
 using Lab1.Models.Entities.Actions;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Lab1.Models.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
-        public DbSet<Admin> Admins { get; set; }
         public DbSet<Client> Clients { get; set; }
-        //public DbSet<Manager> Managers { get; set; }
-        //public DbSet<Operator> Operators { get; set; }
         public DbSet<Specialist> Specialists { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Bank> Banks { get; set; }

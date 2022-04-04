@@ -20,7 +20,6 @@ namespace Lab1.Controllers
         [Authorize(Roles = "operator")]
         public async Task<IActionResult> Profile()
         {
-            //var _operator = await _context.Operators.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var _operator = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var bank = await _context.Banks.FirstOrDefaultAsync(b => b.Id == _operator.BankId);
             var model = new OperatorProfileModel
@@ -35,32 +34,9 @@ namespace Lab1.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "operator")]
-        public async Task<IActionResult> SignUp()
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == User.Identity.Name);
-            var _operator = new Operator
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Password = user.Password,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Patronymic = user.Patronymic,
-                PhoneNumber = user.PhoneNumber,
-                RoleName = user.RoleName,
-                BankId = user.BankId
-            };
-            //_context.Users.Remove(user);
-            //_context.Operators.Add(_operator);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Profile", "Operator");
-        }
-
         [Authorize(Roles = "operator, manager")]
         public async Task<IActionResult> SalaryApprovings()
         {
-            //var _operator = await _context.Operators.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == User.Identity.Name);
             var salaryApprovings = _context.SalaryApprovings;
             var clients = new List<Client>();
@@ -218,6 +194,7 @@ namespace Lab1.Controllers
             clientTo.Balances.Add(balanceTo);
 
             action.Canceled = true;
+            action.CancelTime = DateTime.Now;
             _context.BalanceTransferActions.Update(action);
             _context.Balances.Update(balanceFrom);
             _context.Balances.Update(balanceTo);

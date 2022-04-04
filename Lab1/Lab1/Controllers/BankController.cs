@@ -49,20 +49,6 @@ namespace Lab1.Controllers
                 BIC = bank.BIC,
                 Authenticated = User.Identity.IsAuthenticated
             };
-            /*foreach (var identity in User.Identities)
-            {
-                if (identity.IsAuthenticated)
-                {
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == identity.Name &&
-                        u.BankId == bankId);
-                    if (user != null)
-                    {
-                        ClaimsPrincipal.PrimaryIdentitySelector = (ids) => identity;
-                        return RedirectToAction("Profile", "User");
-                    }
-                }
-            }
-            ClaimsPrincipal.PrimaryIdentitySelector = null;*/
             return View(model);
         }
     }

@@ -40,19 +40,6 @@ namespace Lab1.Controllers
                 {
                     await Authenticate(user);
                     return RedirectToAction("Profile", "User");
-                    /*switch (user.RoleName)
-                    {
-                        case "admin":
-                            return RedirectToAction("Index", "Home");
-                        case "client":
-                            return RedirectToAction("Profile", "Client");
-                        case "manager":
-                            return RedirectToAction("Profile", "Manager");
-                        case "operator":
-                            return RedirectToAction("Profile", "Operator");
-                        case "specialist":
-                            return RedirectToAction("Profile", "Specialist");
-                    }*/
                 }
                 ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
@@ -80,7 +67,8 @@ namespace Lab1.Controllers
 
                 if (user == null)
                 {
-                    user = new User { 
+                    user = new User
+                    {
                         FirstName = model.FirstName,
                         LastName = model.LastName,
                         Patronymic = model.Patronymic,
@@ -99,13 +87,13 @@ namespace Lab1.Controllers
                     switch (user.RoleName)
                     {
                         case "admin":
-                            return RedirectToAction("SignUp", "Admin");
+                            return RedirectToAction("Profile", "Admin");
                         case "client":
                             return RedirectToAction("SignUp", "Client");
                         case "manager":
-                            return RedirectToAction("SignUp", "Manager");
+                            return RedirectToAction("Profile", "Manager");
                         case "operator":
-                            return RedirectToAction("SignUp", "Operator");
+                            return RedirectToAction("Profile", "Operator");
                         case "specialist":
                             return RedirectToAction("SignUp", "Specialist");
                     }
@@ -126,7 +114,7 @@ namespace Lab1.Controllers
                     return RedirectToAction("Profile", "Admin");
                 case "client":
                     var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id == User.Identity.Name);
-                    if(client == null)
+                    if (client == null)
                     {
                         return RedirectToAction("SignUp", "Client");
                     }
@@ -155,17 +143,7 @@ namespace Lab1.Controllers
             };
             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
-            /*if (User.Identity.IsAuthenticated)
-            {
-                User.AddIdentity(id);
-                var identity = User.Identities.FirstOrDefault(i => i.Name == user.Id);
-                ClaimsPrincipal.PrimaryIdentitySelector = (ids) => identity;
-                await _context.SaveChangesAsync();
-            }
-            else*/
-            //{
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-            //}
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 
         public async Task<IActionResult> LogOut()

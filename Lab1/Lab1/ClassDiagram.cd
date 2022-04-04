@@ -93,14 +93,14 @@
   <Class Name="Lab1.Controllers.ManagerController">
     <Position X="2.25" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ACAGAAAEBAYADEAABAAIAgAAAAAIBCAAEBAgAAoAcAo=</HashCode>
+      <HashCode>ACAGAAAEBAYABEAABAAIAgAAAAAIBCAAEBAgAAoAcAo=</HashCode>
       <FileName>Controllers\ManagerController.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Lab1.Controllers.OperatorController">
-    <Position X="2.25" Y="8" Width="1.5" />
+    <Position X="2.25" Y="7.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQAAAAIAAAAADAEAACAAAABAAAACAAAAABAAAAAAAAA=</HashCode>
+      <HashCode>AQAAAAIAAAAABAEAACAAAABAAAACAAAAABAAAAAAAAA=</HashCode>
       <FileName>Controllers\OperatorController.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -177,7 +177,7 @@
   <Class Name="Lab1.Models.Data.ApplicationDbContext">
     <Position X="9.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>wAAAACMAIAYSEEAAECEIAYJQEgFqAAAAAAAAJAIAMAg=</HashCode>
+      <HashCode>wAAAACMAIAYSEEAAECEIAIJQEgFqAAAAAAAAJAIAMAg=</HashCode>
       <FileName>Models\Data\ApplicationDbContext.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -702,7 +702,7 @@
   <Class Name="Lab1.Models.Entities.Actions.Action">
     <Position X="47.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAAAAAAgAAAAAgAAAAAAAAAAQAACEAAAQA=</HashCode>
+      <HashCode>AAACAAAAAAAAAAAAgAAAAAgAAAAAAAAAAQAACEAAARA=</HashCode>
       <FileName>Models\Entities\Actions\Action.cs</FileName>
     </TypeIdentifier>
   </Class>

@@ -11,5 +11,6 @@ namespace Lab1.Models.Entities.Actions
         public string Type { get; set; }
         public string UserId { get; set; }
         public string UserEmail { get; set; }
+        public DateTime CancelTime { get; set; }
     }
 }
