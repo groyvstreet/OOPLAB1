@@ -40,7 +40,12 @@ namespace Lab1.Controllers
                     ModelState.AddModelError("", "Минимальная сумма - 1000");
                     return View(model);
                 }
-                if(model.ClosedTime < DateTime.Now)
+                if (modelMoney > 1000000)
+                {
+                    ModelState.AddModelError("", "Максимальная сумма пополнения за раз - 1000000");
+                    return View(model);
+                }
+                if (model.ClosedTime < DateTime.Now)
                 {
                     ModelState.AddModelError("", "Некорректное время закрытия");
                     return View(model);
@@ -57,7 +62,8 @@ namespace Lab1.Controllers
                 {
                     if(balance.Money < modelMoney)
                     {
-                        return View();
+                        ModelState.AddModelError("", "На указанном счете недостаточно средств");
+                        return View(model);
                     }
                     client.Balances.Remove(balance);
                     balance.Money -= modelMoney;
@@ -100,6 +106,12 @@ namespace Lab1.Controllers
             if (modelMoney < 0.01)
             {
                 ModelState.AddModelError("", "Минимальная сумма - 0.01");
+                ViewBag.DepositId = model.Id;
+                return View(model);
+            }
+            if (modelMoney > 1000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма пополнения за раз - 1000000");
                 ViewBag.DepositId = model.Id;
                 return View(model);
             }

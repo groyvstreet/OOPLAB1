@@ -186,7 +186,7 @@ namespace Lab1.Controllers
         {
             var action = await _context.BalanceTransferActions
                 .FirstOrDefaultAsync(a => a.Id == actionId);
-            if (action.BalanceIdFrom == null || action.BalanceIdTo == null || action.Canceled == true)
+            if (action.Canceled == true)
             {
                 return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });
             }
@@ -200,6 +200,10 @@ namespace Lab1.Controllers
                 action.BalanceIdFrom);
             var balanceTo = await _context.Balances.FirstOrDefaultAsync(b => b.Id ==
                 action.BalanceIdTo);
+            if (balanceFrom == null || balanceTo == null)
+            {
+                return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });
+            }
             if (balanceTo.Money < action.Money)
             {
                 return RedirectToAction("ClientBalanceTransferActions", "Operator", new { clientId = action.UserId });

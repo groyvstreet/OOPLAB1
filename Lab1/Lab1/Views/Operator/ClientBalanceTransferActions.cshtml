@@ -21,26 +21,28 @@
                 <td>
                     <div>Банк: @action.BankNameFrom</div>
                     <div>Почта клиента: @action.UserEmail</div>
-                    @if (action.BalanceIdFrom == null)
-                    {
+                    @*@if (action.BalanceIdFrom == null)
+                        {
                         <div>Счет закрыт</div>
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
                         <div>Наименование счета: @action.BalanceNameFrom</div>
-                    }
+                        }*@
+                    <div>Наименование счета: @action.BalanceNameFrom</div>
                 </td>
                 <td>
                     <div>Банк: @action.BankNameTo</div>
                     <div>Почта клиента: @action.UserEmailTo</div>
-                    @if (action.BalanceIdTo == null)
-                    {
+                    @*@if (action.BalanceIdTo == null)
+                        {
                         <div>Счет закрыт</div>
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
                         <div>Наименование счета: @action.BalanceNameTo</div>
-                    }
+                        }*@
+                    <div>Наименование счета: @action.BalanceNameTo</div>
                 </td>
                 <td>
                     @if (action.UserId == Model.CurrentClientId)
@@ -58,19 +60,25 @@
                 }
                 else
                 {
-                    @if (action.BalanceIdFrom != null && action.BalanceIdTo != null)
-                    {
+                    @*@if (action.BalanceIdFrom != null && action.BalanceIdTo != null)
+                        {
                         <td>
-                            <form asp-action="CancelBalanceTransfer" asp-controller="Operator" asp-anti-forgery="true">
-                                <input type="hidden" name="actionId" value="@action.Id" />
-                                <input type="submit" value="Отменить">
-                            </form>
+                        <form asp-action="CancelBalanceTransfer" asp-controller="Operator" asp-anti-forgery="true">
+                        <input type="hidden" name="actionId" value="@action.Id" />
+                        <input type="submit" value="Отменить">
+                        </form>
                         </td>
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
                         <td>Перевод не возможен</td>
-                    }
+                        }*@
+                    <td>
+                        <form asp-action="CancelClientBalanceTransfer" asp-controller="Operator" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
                 }
             </tr>
         }

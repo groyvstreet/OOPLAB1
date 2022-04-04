@@ -12,12 +12,14 @@
     <table cellpadding="10" border="1">
         <caption>Получение заработной платы</caption>
         <tr>
+            <th>Время</th>
             <th>Наименование счета</th>
             <th>Сумма перевода</th>
         </tr>
         @foreach (var action in Model.Actions)
         {
             <tr>
+                <td>@action.Time</td>
                 <td>@action.BalanceName</td>
                 <td>@action.Money</td>
                 @if (!action.Canceled)

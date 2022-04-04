@@ -23,8 +23,7 @@ namespace Lab1.Controllers
         {
             return View();
         }
-
-
+        
         [HttpPost]
         [Authorize(Roles = "client")]
         public async Task<IActionResult> Create(CreateInstallmentModel model)
@@ -33,6 +32,11 @@ namespace Lab1.Controllers
             if (modelMoney < 1000)
             {
                 ModelState.AddModelError("", "Минимальная сумма - 1000");
+                return View(model);
+            }
+            if (modelMoney > 1000000000)
+            {
+                ModelState.AddModelError("", "Максимальная сумма взятия рассрочки - 1 000 000 000");
                 return View(model);
             }
             if (model.Months > 120)
@@ -114,8 +118,7 @@ namespace Lab1.Controllers
             client.Installments.Remove(installment);
             client.Balances.Remove(balance);
             balance.Money -= installment.PayMoney;
-            balance.Money = Math.Round(balance.Money, 2,
-                MidpointRounding.ToPositiveInfinity);
+            balance.Money = Math.Round(balance.Money, 2, MidpointRounding.ToPositiveInfinity);
             client.Balances.Add(balance);
             _context.Balances.Update(balance);
             _context.Clients.Update(client);

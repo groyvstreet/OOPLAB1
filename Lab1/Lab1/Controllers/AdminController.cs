@@ -101,6 +101,10 @@ namespace Lab1.Controllers
                 a.Id == actionId);
             var deposit = await _context.Deposits.FirstOrDefaultAsync(d => d.Id ==
                 action.DepositId);
+            if (deposit == null)
+            {
+                return RedirectToAction("BlockDepositActions", "Admin", new { managerId = action.UserId });
+            }
             var client = await _context.Clients
                 .Include(c => c.Deposits)
                 .FirstOrDefaultAsync(c => c.Id == deposit.ClientId);
@@ -133,6 +137,10 @@ namespace Lab1.Controllers
                 a.Id == actionId);
             var deposit = await _context.Deposits.FirstOrDefaultAsync(d => d.Id ==
                 action.DepositId);
+            if (deposit == null)
+            {
+                return RedirectToAction("FreezeDepositActions", "Admin", new { managerId = action.UserId });
+            }
             var client = await _context.Clients
                 .Include(c => c.Deposits)
                 .FirstOrDefaultAsync(c => c.Id == deposit.ClientId);
@@ -165,6 +173,10 @@ namespace Lab1.Controllers
                 a.Id == actionId);
             var deposit = await _context.Deposits.FirstOrDefaultAsync(d => d.Id ==
                 action.DepositId);
+            if (deposit == null)
+            {
+                return RedirectToAction("UnblockDepositActions", "Admin", new { managerId = action.UserId });
+            }
             var client = await _context.Clients
                 .Include(c => c.Deposits)
                 .FirstOrDefaultAsync(c => c.Id == deposit.ClientId);
@@ -197,6 +209,10 @@ namespace Lab1.Controllers
                 a.Id == actionId);
             var deposit = await _context.Deposits.FirstOrDefaultAsync(d => d.Id ==
                 action.DepositId);
+            if (deposit == null)
+            {
+                return RedirectToAction("UnfreezeDepositActions", "Admin", new { managerId = action.UserId });
+            }
             var client = await _context.Clients
                 .Include(c => c.Deposits)
                 .FirstOrDefaultAsync(c => c.Id == deposit.ClientId);
@@ -229,6 +245,10 @@ namespace Lab1.Controllers
                 a.Id == actionId);
             var deposit = await _context.Deposits.FirstOrDefaultAsync(d => d.Id ==
                 action.DepositId);
+            if (deposit == null)
+            {
+                return RedirectToAction("CreateDepositActions", "Admin", new { clientId = action.UserId });
+            }
             var client = await _context.Clients
                 .Include(c => c.Deposits)
                 .Include(c => c.Balances)
@@ -273,6 +293,7 @@ namespace Lab1.Controllers
                 .FirstOrDefaultAsync(c => c.Id == action.UserId);
             var deposit = new Deposit
             {
+                Id = action.DepositId,
                 Money = action.Money,
                 Percent = action.Percent,
                 OpenedTime = action.OpenedTime,
@@ -359,6 +380,7 @@ namespace Lab1.Controllers
             }
             var depositFrom = new Deposit
             {
+                Id = action.DepositId,
                 Money = action.Money,
                 Percent = action.Percent,
                 OpenedTime = action.OpenedTime,
@@ -471,11 +493,11 @@ namespace Lab1.Controllers
             {
                 if (user.RoleName == "operator")
                 {
-                    return RedirectToAction("SalaryRejectingByOperatorActions", "Admin", new { operatorId = action.UserId });
+                    return RedirectToAction("SalaryApprovingByOperatorActions", "Admin", new { operatorId = action.UserId });
                 }
                 else
                 {
-                    return RedirectToAction("SalaryRejectingByManagerActions", "Admin", new { managerId = action.UserId });
+                    return RedirectToAction("SalaryApprovingByManagerActions", "Admin", new { managerId = action.UserId });
                 }
             }
             client.Salary.ApprovedByOperator = false;
@@ -490,11 +512,11 @@ namespace Lab1.Controllers
             await _context.SaveChangesAsync();
             if (user.RoleName == "operator")
             {
-                return RedirectToAction("SalaryRejectingByOperatorActions", "Admin", new { operatorId = action.UserId });
+                return RedirectToAction("SalaryApprovingByOperatorActions", "Admin", new { operatorId = action.UserId });
             }
             else
             {
-                return RedirectToAction("SalaryRejectingByManagerActions", "Admin", new { managerId = action.UserId });
+                return RedirectToAction("SalaryApprovingByManagerActions", "Admin", new { managerId = action.UserId });
             }
         }
 
@@ -643,7 +665,13 @@ namespace Lab1.Controllers
             var client = await _context.Clients
                 .Include(c => c.Balances)
                 .FirstOrDefaultAsync(c => c.Id == action.UserId);
-            var balance = new Balance
+            var balance = await _context.Balances.FirstOrDefaultAsync(b => b.Name ==
+                action.BalanceName && b.ClientId == action.UserId);
+            if (balance != null)
+            {
+                return RedirectToAction("CloseBalanceActions", "Admin", new { clientId = action.UserId });
+            }
+            balance = new Balance
             {
                 Id = action.BalanceId,
                 Name = action.BalanceName,
@@ -907,6 +935,8 @@ namespace Lab1.Controllers
                     Id = action.CreditId,
                     Money = action.Money,
                     MoneyWithPercent = action.SinglePaymentMoney,
+                    Fines = action.Fines,
+                    Percent = action.Percent,
                     Months = action.Months,
                     PayedMonths = action.PayedMonths,
                     CreatingTime = action.CreatingTime,

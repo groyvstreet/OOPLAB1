@@ -12,6 +12,7 @@
     <table cellpadding="10" border="1">
         <caption>Разблокировки вкладов</caption>
         <tr>
+            <th>Время</th>
             <th>Менеджер</th>
             <th>Клиент</th>
             <th>Сумма вклада</th>
@@ -20,25 +21,32 @@
         @foreach (var action in Model.Actions)
         {
             <tr>
+                <td>@action.Time</td>
                 <td>@action.UserEmail</td>
                 <td>@action.ClientEmail</td>
                 <td>@action.Money</td>
                 <td>@action.Percent</td>
                 @if (!action.Canceled)
                 {
-                    @if (!action.Closed)
-                    {
+                    @*@if (!action.Closed)
+                        {
                         <td>
-                            <form asp-action="CancelUnblockDepositAction" asp-controller="Admin" asp-anti-forgery="true">
-                                <input type="hidden" name="actionId" value="@action.Id" />
-                                <input type="submit" value="Отменить">
-                            </form>
+                        <form asp-action="CancelUnblockDepositAction" asp-controller="Admin" asp-anti-forgery="true">
+                        <input type="hidden" name="actionId" value="@action.Id" />
+                        <input type="submit" value="Отменить">
+                        </form>
                         </td>
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
                         <td>Вклад закрыт</td>
-                    }
+                        }*@
+                    <td>
+                        <form asp-action="CancelUnblockDepositAction" asp-controller="Admin" asp-anti-forgery="true">
+                            <input type="hidden" name="actionId" value="@action.Id" />
+                            <input type="submit" value="Отменить">
+                        </form>
+                    </td>
                 }
                 else
                 {
